@@ -146,7 +146,7 @@ namespace {
 // Worker function for exporting a scene to 3DS. Prototyped and registered in Exporter.cpp
 void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScene)
 {
-	boost::shared_ptr<IOStream> outfile (pIOSystem->Open(pFile, "wb"));
+	std::shared_ptr<IOStream> outfile (pIOSystem->Open(pFile, "wb"));
 	if(!outfile) {
 		throw DeadlyExportError("Could not open output .3ds file: " + std::string(pFile));
 	} 
@@ -177,7 +177,7 @@ void ExportScene3DS(const char* pFile, IOSystem* pIOSystem, const aiScene* pScen
 } // end of namespace Assimp
 
 // ------------------------------------------------------------------------------------------------
-Discreet3DSExporter:: Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, const aiScene* scene)
+Discreet3DSExporter:: Discreet3DSExporter(std::shared_ptr<IOStream> outfile, const aiScene* scene)
 : scene(scene)
 , writer(outfile)
 {

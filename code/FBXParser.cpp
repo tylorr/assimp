@@ -217,7 +217,7 @@ Scope::Scope(Parser& parser,bool topLevel)
 // ------------------------------------------------------------------------------------------------
 Scope::~Scope()
 {
-	BOOST_FOREACH(ElementMap::value_type& v, elements) {
+	for (ElementMap::value_type& v : elements) {
 		delete v.second;
 	}
 }

@@ -115,8 +115,8 @@ void JoinVerticesProcess::Execute( aiScene* pScene)
 // Unites identical vertices in the given mesh
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 {
-	BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_COLOR_SETS    == 8);
-	BOOST_STATIC_ASSERT( AI_MAX_NUMBER_OF_TEXTURECOORDS == 8);
+	static_assert( AI_MAX_NUMBER_OF_COLOR_SETS    == 8, "AI_MAX_NUMBER_OF_COLOR_SETS does not equal 8");
+	static_assert( AI_MAX_NUMBER_OF_TEXTURECOORDS == 8, "AI_MAX_NUMBER_OF_TEXTURECOORDS does not equal 8");
 
 	// Return early if we don't have any positions
 	if (!pMesh->HasPositions() || !pMesh->HasFaces()) {
@@ -132,7 +132,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex)
 	//	whether a new vertex was created for the index (true) or if it was replaced by an existing
 	//	unique vertex (false). This saves an additional std::vector<bool> and greatly enhances
 	//	branching performance.
-	BOOST_STATIC_ASSERT(AI_MAX_VERTICES == 0x7fffffff);
+	static_assert(AI_MAX_VERTICES == 0x7fffffff, "AI_MAX_VERTICES does not equal 0x7fffffff");
 	std::vector<unsigned int> replaceIndex( pMesh->mNumVertices, 0xffffffff);
 
 	// A little helper to find locally close vertices faster.

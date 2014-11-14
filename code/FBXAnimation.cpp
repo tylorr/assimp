@@ -110,7 +110,7 @@ AnimationCurveNode::AnimationCurveNode(uint64_t id, const Element& element, cons
 	const char* whitelist[] = {"Model","NodeAttribute"};
 	const std::vector<const Connection*>& conns = doc.GetConnectionsBySourceSequenced(ID(),whitelist,2);
 
-	BOOST_FOREACH(const Connection* con, conns) {
+	for (const Connection* con : conns) {
 
 		// link should go for a property
 		if (!con->PropertyName().length()) {
@@ -171,7 +171,7 @@ const AnimationCurveMap& AnimationCurveNode::Curves() const
 		// resolve attached animation curves
 		const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurve");
 
-		BOOST_FOREACH(const Connection* con, conns) {
+		for (const Connection* con : conns) {
 
 			// link should go for a property
 			if (!con->PropertyName().length()) {
@@ -227,7 +227,7 @@ AnimationCurveNodeList AnimationLayer::Nodes(const char* const * target_prop_whi
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationCurveNode");
 	nodes.reserve(conns.size());
 
-	BOOST_FOREACH(const Connection* con, conns) {
+	for (const Connection* con : conns) {
 
 		// link should not go to a property
 		if (con->PropertyName().length()) {
@@ -278,7 +278,7 @@ AnimationStack::AnimationStack(uint64_t id, const Element& element, const std::s
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"AnimationLayer");
 	layers.reserve(conns.size());
 
-	BOOST_FOREACH(const Connection* con, conns) {
+	for (const Connection* con : conns) {
 
 		// link should not go to a property
 		if (con->PropertyName().length()) {

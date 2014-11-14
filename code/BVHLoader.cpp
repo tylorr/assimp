@@ -110,7 +110,7 @@ void BVHLoader::InternReadFile( const std::string& pFile, aiScene* pScene, IOSys
 	mFileName = pFile;
 
 	// read file into memory
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 	if( file.get() == NULL)
 		throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
@@ -171,12 +171,22 @@ aiNode* BVHLoader::ReadNode()
 	// first token is name
 	std::string nodeName = GetNextToken();
 	if( nodeName.empty() || nodeName == "{")
-		ThrowException( boost::str( boost::format( "Expected node name, but found \"%s\".") % nodeName));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Expected node name, but found \"" << nodeName << "\".";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 
 	// then an opening brace should follow
 	std::string openBrace = GetNextToken();
 	if( openBrace != "{")
-		ThrowException( boost::str( boost::format( "Expected opening brace \"{\", but found \"%s\".") % openBrace));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Expected opening brace \"{\", but found \"" << openBrace << "\".";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 
 	// Create a node
 	aiNode* node = new aiNode( nodeName);
@@ -208,7 +218,12 @@ aiNode* BVHLoader::ReadNode()
 			// The real symbol is "End Site". Second part comes in a separate token
 			std::string siteToken = GetNextToken();
 			if( siteToken != "Site")
-				ThrowException( boost::str( boost::format( "Expected \"End Site\" keyword, but found \"%s %s\".") % token % siteToken));
+			{
+				std::ostringstream stringStream;
+				stringStream << "Expected \"End Site\" keyword, but found \"" << token << " " << siteToken << "\".";
+				const std::string message = stringStream.str();
+				ThrowException(message.c_str());
+			}
 
 			aiNode* child = ReadEndSite( nodeName);
 			child->mParent = node;
@@ -221,7 +236,10 @@ aiNode* BVHLoader::ReadNode()
 		} else
 		{
 			// everything else is a parse error
-			ThrowException( boost::str( boost::format( "Unknown keyword \"%s\".") % token));
+			std::ostringstream stringStream;
+			stringStream << "Unknown keyword \"" << token << "\".";
+			const std::string message = stringStream.str();
+			ThrowException(message);
 		}
 	}
 
@@ -244,7 +262,12 @@ aiNode* BVHLoader::ReadEndSite( const std::string& pParentName)
 	// check opening brace
 	std::string openBrace = GetNextToken();
 	if( openBrace != "{")
-		ThrowException( boost::str( boost::format( "Expected opening brace \"{\", but found \"%s\".") % openBrace));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Expected opening brace \"{\", but found \"" << openBrace << "\".";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 
 	// Create a node
 	aiNode* node = new aiNode( "EndSite_" + pParentName);
@@ -266,7 +289,10 @@ aiNode* BVHLoader::ReadEndSite( const std::string& pParentName)
 		} else
 		{
 			// everything else is a parse error
-			ThrowException( boost::str( boost::format( "Unknown keyword \"%s\".") % token));
+			std::ostringstream stringStream;
+			stringStream << "Unknown keyword \"" << token << "\".";
+			const std::string message = stringStream.str();
+			ThrowException(message.c_str());
 		}
 	}
 
@@ -313,7 +339,12 @@ void BVHLoader::ReadNodeChannels( BVHLoader::Node& pNode)
 		else if( channelToken == "Zrotation")
 			pNode.mChannels.push_back( Channel_RotationZ);
 		else
-			ThrowException( boost::str( boost::format( "Invalid channel specifier \"%s\".") % channelToken));
+		{
+			std::ostringstream stringStream;
+			stringStream << "Invalid channel specifier \"" << channelToken << "\".";
+			const std::string message = stringStream.str();
+			ThrowException(message.c_str());
+		}
 	}
 }
 
@@ -324,7 +355,12 @@ void BVHLoader::ReadMotion( aiScene* /*pScene*/)
 	// Read number of frames
 	std::string tokenFrames = GetNextToken();
 	if( tokenFrames != "Frames:")
-		ThrowException( boost::str( boost::format( "Expected frame count \"Frames:\", but found \"%s\".") % tokenFrames));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Expected frame count \"Frames:\", but found \"" << tokenFrames << "\".";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 
 	float numFramesFloat = GetNextTokenAsFloat();
 	mAnimNumFrames = (unsigned int) numFramesFloat;
@@ -333,7 +369,12 @@ void BVHLoader::ReadMotion( aiScene* /*pScene*/)
 	std::string tokenDuration1 = GetNextToken();
 	std::string tokenDuration2 = GetNextToken();
 	if( tokenDuration1 != "Frame" || tokenDuration2 != "Time:")
-		ThrowException( boost::str( boost::format( "Expected frame duration \"Frame Time:\", but found \"%s %s\".") % tokenDuration1 % tokenDuration2));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Expected frame duration \"Frame Time:\", but found \"" << tokenDuration1 << " " << tokenDuration2 << "\".";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 
 	mAnimTickDuration = GetNextTokenAsFloat();
 
@@ -406,7 +447,12 @@ float BVHLoader::GetNextTokenAsFloat()
 	ctoken = fast_atoreal_move<float>( ctoken, result);
 
 	if( ctoken != token.c_str() + token.length())
-		ThrowException( boost::str( boost::format( "Expected a floating point number, but found \"%s\".") % token));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Expected a floating point number, but found \"" << token <<  "\".";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 
 	return result;
 }
@@ -415,7 +461,10 @@ float BVHLoader::GetNextTokenAsFloat()
 // Aborts the file reading with an exception
 void BVHLoader::ThrowException( const std::string& pError)
 {
-	throw DeadlyImportError( boost::str( boost::format( "%s:%d - %s") % mFileName % mLine % pError));
+	std::ostringstream stringStream;
+	stringStream << mFileName << ":" << mLine << " - " << pError;
+	const std::string message = stringStream.str();
+	throw DeadlyImportError(message.c_str());
 }
 
 // ------------------------------------------------------------------------------------------------

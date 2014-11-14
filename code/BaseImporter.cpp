@@ -140,10 +140,10 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 	if (!pIOHandler)
 		return false;
 
-	boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
+	std::unique_ptr<IOStream> pStream (pIOHandler->Open(pFile));
 	if (pStream.get() )	{
 		// read 200 characters from the file
-		boost::scoped_array<char> _buffer (new char[searchBytes+1 /* for the '\0' */]);
+		std::unique_ptr<char[]> _buffer (new char[searchBytes+1 /* for the '\0' */]);
 		char* buffer = _buffer.get();
 
 		const unsigned int read = pStream->Read(buffer,1,searchBytes);
@@ -239,7 +239,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions)
 		const uint32_t* magic_u32;
 	};
 	magic = reinterpret_cast<const char*>(_magic);
-	boost::scoped_ptr<IOStream> pStream (pIOHandler->Open(pFile));
+	std::unique_ptr<IOStream> pStream (pIOHandler->Open(pFile));
 	if (pStream.get() )	{
 
 		// skip to offset

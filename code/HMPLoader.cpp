@@ -110,7 +110,7 @@ void HMPImporter::InternReadFile( const std::string& pFile,
 {
 	pScene     = _pScene;
 	pIOHandler = _pIOHandler;
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)

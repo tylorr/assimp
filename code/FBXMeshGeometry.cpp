@@ -66,7 +66,7 @@ Geometry::Geometry(uint64_t id, const Element& element, const std::string& name,
 	, skin()
 {
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"Deformer");
-	BOOST_FOREACH(const Connection* con, conns) {
+	for (const Connection* con : conns) {
 		const Skin* const sk = ProcessSimpleConnection<Skin>(*con, false, "Skin -> Geometry", element);
 		if(sk) {
 			skin = sk;
@@ -128,7 +128,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 	// generate output vertices, computing an adjacency table to
 	// preserve the mapping from fbx indices to *this* indexing.
 	unsigned int count = 0;
-	BOOST_FOREACH(int index, tempFaces) {
+	for (int index : tempFaces) {
 		const int absi = index < 0 ? (-index - 1) : index;
 		if(static_cast<size_t>(absi) >= vertex_count) {
 			DOMError("polygon vertex index out of range",&PolygonVertexIndex);
@@ -154,7 +154,7 @@ MeshGeometry::MeshGeometry(uint64_t id, const Element& element, const std::strin
 	}
 
 	cursor = 0;
-	BOOST_FOREACH(int index, tempFaces) {
+	for (int index : tempFaces) {
 		const int absi = index < 0 ? (-index - 1) : index;
 		mappings[mapping_offsets[absi] + mapping_counts[absi]++] = cursor++;
 	}
@@ -402,7 +402,7 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
 		}
 
 		unsigned int next = 0;
-		BOOST_FOREACH(int i, uvIndices) {
+		for (int i : uvIndices) {
 			if(static_cast<size_t>(i) >= tempUV.size()) {
 				DOMError("index out of range",&GetRequiredElement(source,indexDataElementName));
 			}

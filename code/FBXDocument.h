@@ -115,7 +115,7 @@ private:
 
 	const Document& doc;
 	const Element& element;
-	boost::scoped_ptr<const Object> object;
+	std::unique_ptr<const Object> object;
 
 	const uint64_t id;
 
@@ -177,7 +177,7 @@ public:
 
 private:
 
-	boost::shared_ptr<const PropertyTable> props;
+	std::shared_ptr<const PropertyTable> props;
 };
 
 
@@ -513,7 +513,7 @@ private:
 
 	std::string shading;
 	std::string culling;
-	boost::shared_ptr<const PropertyTable> props;
+	std::shared_ptr<const PropertyTable> props;
 };
 
 /** DOM class for generic FBX textures */
@@ -569,7 +569,7 @@ private:
 	std::string relativeFileName;
 	std::string fileName;
 	std::string alphaSource;
-	boost::shared_ptr<const PropertyTable> props;
+	std::shared_ptr<const PropertyTable> props;
 
 	unsigned int crop[4];
 };
@@ -678,7 +678,7 @@ private:
 
 	std::string shading;
 	bool multilayer;
-	boost::shared_ptr<const PropertyTable> props;
+	std::shared_ptr<const PropertyTable> props;
 
 	TextureMap textures;
 	LayeredTextureMap layeredTextures;
@@ -964,7 +964,7 @@ public:
 private:
 
 	const Object* target;
-	boost::shared_ptr<const PropertyTable> props;
+	std::shared_ptr<const PropertyTable> props;
 	mutable AnimationCurveMap curves;
 
 	std::string prop;
@@ -997,7 +997,7 @@ public:
 
 private:
 
-	boost::shared_ptr<const PropertyTable> props;
+	std::shared_ptr<const PropertyTable> props;
 	const Document& doc;
 };
 
@@ -1034,7 +1034,7 @@ public:
 
 private:
 
-	boost::shared_ptr<const PropertyTable> props;
+	std::shared_ptr<const PropertyTable> props;
 	AnimationLayerList layers;
 };
 
@@ -1056,7 +1056,7 @@ public:
 
 private:
 
-	boost::shared_ptr<const PropertyTable> props;
+	std::shared_ptr<const PropertyTable> props;
 };
 
 typedef std::vector<float> WeightArray;
@@ -1200,7 +1200,7 @@ public:
 	// up to many thousands of objects (most of which we never use),
 	// so the memory overhead for them should be kept at a minimum.
 	typedef std::map<uint64_t, LazyObject*> ObjectMap; 
-	typedef std::fbx_unordered_map<std::string, boost::shared_ptr<const PropertyTable> > PropertyTemplateMap;
+	typedef std::fbx_unordered_map<std::string, std::shared_ptr<const PropertyTable> > PropertyTemplateMap;
 
 
 	typedef std::multimap<uint64_t, const Connection*> ConnectionMap;
@@ -1212,7 +1212,7 @@ class FileGlobalSettings
 {
 public:
 
-	FileGlobalSettings(const Document& doc, boost::shared_ptr<const PropertyTable> props);
+	FileGlobalSettings(const Document& doc, std::shared_ptr<const PropertyTable> props);
 	~FileGlobalSettings();
 
 public:
@@ -1269,7 +1269,7 @@ public:
 
 private:
 
-	boost::shared_ptr<const PropertyTable> props;
+	std::shared_ptr<const PropertyTable> props;
 	const Document& doc;
 };
 
@@ -1384,7 +1384,7 @@ private:
 	std::vector<uint64_t> animationStacks;
 	mutable std::vector<const AnimationStack*> animationStacksResolved;
 
-	boost::scoped_ptr<FileGlobalSettings> globals;
+	std::unique_ptr<FileGlobalSettings> globals;
 };
 
 }

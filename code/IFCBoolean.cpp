@@ -344,7 +344,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 	n.Normalize();
 
 	// obtain the polygonal bounding volume
-	boost::shared_ptr<TempMesh> profile = boost::shared_ptr<TempMesh>(new TempMesh());
+	std::shared_ptr<TempMesh> profile = std::shared_ptr<TempMesh>(new TempMesh());
 	if(!ProcessCurve(hs->PolygonalBoundary, *profile.get(), conv)) {
 		IFCImporter::LogError("expected valid polyline for boundary of boolean halfspace");
 		return;
@@ -518,7 +518,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 
 						IfcFloat d = 1e20;
 						IfcVector3 vclosest;
-						BOOST_FOREACH(const IfcVector3& v, intersected_boundary_points) {
+						for (const IfcVector3& v : intersected_boundary_points) {
 							const IfcFloat dn = (v-e1_plane).SquareLength();
 							if (dn < d) {
 								d = dn;
@@ -554,7 +554,7 @@ void ProcessPolygonalBoundedBooleanHalfSpaceDifference(const IfcPolygonalBounded
 
 						IfcFloat d = 1e20;
 						IfcVector3 vclosest;
-						BOOST_FOREACH(const IfcVector3& v, intersected_boundary_points) {
+						for (const IfcVector3& v : intersected_boundary_points) {
 							const IfcFloat dn = (v-e0_plane).SquareLength();
 							if (dn < d) {
 								d = dn;
@@ -627,17 +627,17 @@ void ProcessBooleanExtrudedAreaSolidDifference(const IfcExtrudedAreaSolid* as, T
 	// operand should be near-planar. Luckily, this is usually the case in Ifc 
 	// buildings.
 
-	boost::shared_ptr<TempMesh> meshtmp = boost::shared_ptr<TempMesh>(new TempMesh());
+	std::shared_ptr<TempMesh> meshtmp = std::shared_ptr<TempMesh>(new TempMesh());
 	ProcessExtrudedAreaSolid(*as,*meshtmp,conv,false);
 
-	std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp,boost::shared_ptr<TempMesh>()));
+	std::vector<TempOpening> openings(1, TempOpening(as,IfcVector3(0,0,0),meshtmp,std::shared_ptr<TempMesh>()));
 
 	result = first_operand;
 
 	TempMesh temp;
 
 	std::vector<IfcVector3>::const_iterator vit = first_operand.verts.begin();
-	BOOST_FOREACH(unsigned int pcount, first_operand.vertcnt) {
+	for (unsigned int pcount : first_operand.vertcnt) {
 		temp.Clear();
 
 		temp.verts.insert(temp.verts.end(), vit, vit + pcount);

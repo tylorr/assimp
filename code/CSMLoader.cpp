@@ -115,7 +115,7 @@ void CSMImporter::SetupProperties(const Importer* pImp)
 void CSMImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+	std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL) {

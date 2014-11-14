@@ -114,7 +114,7 @@ void TempMesh::Clear()
 // ------------------------------------------------------------------------------------------------
 void TempMesh::Transform(const IfcMatrix4& mat) 
 {
-	BOOST_FOREACH(IfcVector3& v, verts) {
+	for (IfcVector3& v : verts) {
 		v *= mat;
 	}
 }
@@ -204,7 +204,7 @@ void TempMesh::ComputePolygonNormals(std::vector<IfcVector3>& normals,
 	}
 
 	if(normalize) {
-		BOOST_FOREACH(IfcVector3& n, normals) {
+		for (IfcVector3& n : normals) {
 			n.Normalize();
 		}
 	}
@@ -236,7 +236,7 @@ void TempMesh::FixupFaceOrientation()
 	ComputePolygonNormals(normals);
 
 	size_t c = 0, ofs = 0;
-	BOOST_FOREACH(unsigned int cnt, vertcnt) {
+	for (unsigned int cnt : vertcnt) {
 		if (cnt>2){
 			const IfcVector3& thisvert = verts[c];
 			if (normals[ofs]*(thisvert-vavg) < 0) {
@@ -254,7 +254,7 @@ void TempMesh::RemoveAdjacentDuplicates()
 
 	bool drop = false;
 	std::vector<IfcVector3>::iterator base = verts.begin();
-	BOOST_FOREACH(unsigned int& cnt, vertcnt) {
+	for (unsigned int& cnt : vertcnt) {
 		if (cnt < 2){
 			base += cnt;
 			continue;

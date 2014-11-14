@@ -344,7 +344,7 @@ void AssbinImporter::ReadBinaryMesh( IOStream * stream, aiMesh* mesh )
 		for (unsigned int i = 0; i < mesh->mNumFaces;++i) {
 			aiFace& f = mesh->mFaces[i];
 
-			BOOST_STATIC_ASSERT(AI_MAX_FACE_INDICES <= 0xffff);
+			static_assert(AI_MAX_FACE_INDICES <= 0xffff, "AI_MAX_FACE_INDICES is too large");
 			f.mNumIndices = Read<uint16_t>(stream);
 			f.mIndices = new unsigned int[f.mNumIndices];
 

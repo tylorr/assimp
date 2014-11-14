@@ -101,7 +101,7 @@ private:
 };
 
 
-typedef std::fbx_unordered_map<std::string,boost::shared_ptr<Property> > DirectPropertyMap;
+typedef std::fbx_unordered_map<std::string,std::shared_ptr<Property> > DirectPropertyMap;
 typedef std::fbx_unordered_map<std::string,const Property*> PropertyMap;
 typedef std::fbx_unordered_map<std::string,const Element*> LazyPropertyMap;
 
@@ -113,7 +113,7 @@ public:
 	// in-memory property table with no source element
 	PropertyTable();
 	
-	PropertyTable(const Element& element, boost::shared_ptr<const PropertyTable> templateProps);
+	PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps);
 	~PropertyTable();
 
 public:
@@ -135,7 +135,7 @@ private:
 
 	LazyPropertyMap lazyProps;
 	mutable PropertyMap props;
-	const boost::shared_ptr<const PropertyTable> templateProps;
+	const std::shared_ptr<const PropertyTable> templateProps;
 	const Element* const element;
 };
 

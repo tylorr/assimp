@@ -82,7 +82,7 @@ void ExportSceneXFile(const char* pFile,IOSystem* pIOSystem, const aiScene* pSce
 	XFileExporter iDoTheExportThing( pScene, pIOSystem, path, file);
 
 	// we're still here - export successfully completed. Write result to the given IOSYstem
-	boost::scoped_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
+	std::unique_ptr<IOStream> outfile (pIOSystem->Open(pFile,"wt"));
 	if(outfile == NULL) {
 		throw DeadlyExportError("could not open output .dae file: " + std::string(pFile));
 	}

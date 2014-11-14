@@ -51,8 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // ------------------------------------------------------------------------------------------------
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-#	include <boost/thread/thread.hpp>
-#	include <boost/thread/mutex.hpp>
+#	include <thread>
+#	include <mutex>
 #endif
 // ------------------------------------------------------------------------------------------------
 using namespace Assimp;
@@ -89,7 +89,7 @@ namespace Assimp
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
 /** Global mutex to manage the access to the logstream map */
-static boost::mutex gLogStreamMutex;
+static std::mutex gLogStreamMutex;
 #endif
 
 
@@ -105,7 +105,7 @@ public:
 
 	~LogToCallbackRedirector()	{
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-		boost::mutex::scoped_lock lock(gLogStreamMutex);
+		std::lock_guard<std::mutex> lock(gLogStreamMutex);
 #endif
 		// (HACK) Check whether the 'stream.user' pointer points to a
 		// custom LogStream allocated by #aiGetPredefinedLogStream.
@@ -340,7 +340,7 @@ ASSIMP_API void aiAttachLogStream( const aiLogStream* stream )
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-	boost::mutex::scoped_lock lock(gLogStreamMutex);
+	std::lock_guard<std::mutex> lock(gLogStreamMutex);
 #endif
 
 	LogStream* lg = new LogToCallbackRedirector(*stream);
@@ -359,7 +359,7 @@ ASSIMP_API aiReturn aiDetachLogStream( const aiLogStream* stream)
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-	boost::mutex::scoped_lock lock(gLogStreamMutex);
+	std::lock_guard<std::mutex> lock(gLogStreamMutex);
 #endif
 	// find the logstream associated with this data
 	LogStreamMap::iterator it = gActiveLogStreams.find( *stream);
@@ -384,7 +384,7 @@ ASSIMP_API void aiDetachAllLogStreams(void)
 {
 	ASSIMP_BEGIN_EXCEPTION_REGION();
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-	boost::mutex::scoped_lock lock(gLogStreamMutex);
+	std::lock_guard<std::mutex> lock(gLogStreamMutex);
 #endif
 	for (LogStreamMap::iterator it = gActiveLogStreams.begin(); it != gActiveLogStreams.end(); ++it) {
 		DefaultLogger::get()->detatchStream( it->second );

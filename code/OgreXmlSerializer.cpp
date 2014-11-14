@@ -739,12 +739,12 @@ XmlReaderPtr OgreXmlSerializer::OpenReader(Assimp::IOSystem *pIOHandler, const s
 		return XmlReaderPtr();
 	}
 
-	boost::scoped_ptr<IOStream> file(pIOHandler->Open(filename));
+	std::unique_ptr<IOStream> file(pIOHandler->Open(filename));
 	if (!file.get()) {
 		throw DeadlyImportError("Failed to open skeleton file " + filename);
 	}
 
-	boost::scoped_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
+	std::unique_ptr<CIrrXML_IOStreamReader> stream(new CIrrXML_IOStreamReader(file.get()));
 	XmlReaderPtr reader = XmlReaderPtr(irr::io::createIrrXMLReader(stream.get()));
 	if (!reader.get()) {
 		throw DeadlyImportError("Failed to create XML reader for skeleton file " + filename);

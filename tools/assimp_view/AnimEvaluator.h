@@ -43,8 +43,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef AV_ANIMEVALUATOR_H_INCLUDED
 #define AV_ANIMEVALUATOR_H_INCLUDED
 
-#include <boost/tuple/tuple.hpp>
-
 namespace AssimpView
 {
 
@@ -80,7 +78,7 @@ protected:
 	 * Useful to quickly find the corresponding frame for slightly increased time stamps
 	 */
 	double mLastTime;
-	std::vector<boost::tuple<unsigned int, unsigned int, unsigned int> > mLastPositions;
+	std::vector<std::tuple<unsigned int, unsigned int, unsigned int> > mLastPositions;
 
 	/** The array to store the transformations results of the evaluation */
 	std::vector<aiMatrix4x4> mTransforms;

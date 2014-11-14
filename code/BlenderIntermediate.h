@@ -50,8 +50,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BlenderScene.h"
 #include "BlenderSceneGen.h"
 
-#define for_each(x,y) BOOST_FOREACH(x,y)
-
 namespace Assimp {
 namespace Blender {
 
@@ -66,7 +64,7 @@ namespace Blender {
 		}
 
 		~TempArray () {
-			for_each(T* elem, arr) {
+			for (T* elem : arr) {
 				delete elem;
 			}
 		}
@@ -139,7 +137,7 @@ namespace Blender {
 		TempArray <std::vector, aiTexture> textures;
 
 		// set of all materials referenced by at least one mesh in the scene
-		std::deque< boost::shared_ptr< Material > > materials_raw;
+		std::deque< std::shared_ptr< Material > > materials_raw;
 
 		// counter to name sentinel textures inserted as substitutes for procedural textures.
 		unsigned int sentinel_cnt;

@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <exception>
 #include <iterator>
-#include <boost/tuple/tuple.hpp>
 
 #include "FBXImporter.h"
 
@@ -140,7 +139,7 @@ void FBXImporter::SetupProperties(const Importer* pImp)
 void FBXImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
+	std::unique_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
 	if (!stream) {
 		ThrowException("Could not open file for reading");
 	}

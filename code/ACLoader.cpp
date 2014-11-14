@@ -489,7 +489,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 
 			for (it = object.surfaces.begin(); it != end; ++it)
 			{
-				register unsigned int idx = (*it).mat;
+				unsigned int idx = (*it).mat;
 				if (idx >= needMat.size())
 				{
 					DefaultLogger::get()->error("AC3D: material index is out of range");
@@ -617,7 +617,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 							it2  = (*it).entries.begin();
 
 							// either a closed or an unclosed line
-							register unsigned int tmp = (unsigned int)(*it).entries.size();
+							unsigned int tmp = (unsigned int)(*it).entries.size();
 							if (0x2 == type)--tmp;
 							for (unsigned int m = 0; m < tmp;++m)
 							{
@@ -667,7 +667,7 @@ aiNode* AC3DImporter::ConvertObjectSection(Object& object,
 			// collect all meshes using the same material group.
 			if (object.subDiv)	{
 				if (configEvalSubdivision) {
-					boost::scoped_ptr<Subdivider> div(Subdivider::Create(Subdivider::CATMULL_CLARKE));
+					std::unique_ptr<Subdivider> div(Subdivider::Create(Subdivider::CATMULL_CLARKE));
 					DefaultLogger::get()->info("AC3D: Evaluating subdivision surface: "+object.name);
 
 					std::vector<aiMesh*> cpy(meshes.size()-oldm,NULL);
@@ -746,7 +746,7 @@ void AC3DImporter::SetupProperties(const Importer* pImp)
 void AC3DImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
+	std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, "rb"));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)

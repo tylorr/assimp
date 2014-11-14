@@ -178,7 +178,7 @@ aiMaterial* OgreImporter::ReadMaterial(const std::string &pFile, Assimp::IOSyste
 			return 0;
 		}
 
-		boost::scoped_ptr<IOStream> stream(materialFile);
+		std::unique_ptr<IOStream> stream(materialFile);
 		if (stream->FileSize() == 0)
 		{
 			DefaultLogger::get()->warn(Formatter::format() << "Source file for material '" << materialName << "' is empty (size is 0 bytes)");

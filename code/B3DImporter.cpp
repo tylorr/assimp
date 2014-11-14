@@ -107,7 +107,7 @@ void B3DImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOS
 	cout<<"Hello world from the B3DImporter!"<<endl;
 #endif
 
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)

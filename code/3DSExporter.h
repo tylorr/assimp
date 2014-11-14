@@ -60,7 +60,7 @@ namespace Assimp
 class Discreet3DSExporter
 {
 public:
-	Discreet3DSExporter(boost::shared_ptr<IOStream> outfile, const aiScene* pScene);
+	Discreet3DSExporter(std::shared_ptr<IOStream> outfile, const aiScene* pScene);
 
 private:
 

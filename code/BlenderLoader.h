@@ -126,7 +126,7 @@ protected:
 
 	// --------------------
 	void ParseBlendFile(Blender::FileDatabase& out, 
-		boost::shared_ptr<IOStream> stream
+		std::shared_ptr<IOStream> stream
 	);
 
 	// --------------------

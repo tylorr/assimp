@@ -137,12 +137,12 @@ PropertyTable::PropertyTable()
 
 
 // ------------------------------------------------------------------------------------------------
-PropertyTable::PropertyTable(const Element& element, boost::shared_ptr<const PropertyTable> templateProps)
+PropertyTable::PropertyTable(const Element& element, std::shared_ptr<const PropertyTable> templateProps)
 : templateProps(templateProps)
 , element(&element)
 {
 	const Scope& scope = GetRequiredScope(element);
-	BOOST_FOREACH(const ElementMap::value_type& v, scope.Elements()) {
+	for (const ElementMap::value_type& v : scope.Elements()) {
 		if(v.first != "P") {
 			DOMWarning("expected only P elements in property table",v.second);
 			continue;
@@ -168,7 +168,7 @@ PropertyTable::PropertyTable(const Element& element, boost::shared_ptr<const Pro
 // ------------------------------------------------------------------------------------------------
 PropertyTable::~PropertyTable()
 {
-	BOOST_FOREACH(PropertyMap::value_type& v, props) {
+	for (PropertyMap::value_type& v : props) {
 		delete v.second;
 	}
 }
@@ -206,7 +206,7 @@ DirectPropertyMap PropertyTable::GetUnparsedProperties() const
 	DirectPropertyMap result;
 
 	// Loop through all the lazy properties (which is all the properties)
-	BOOST_FOREACH(const LazyPropertyMap::value_type& element, lazyProps) {
+	for (const LazyPropertyMap::value_type& element : lazyProps) {
 
 		// Skip parsed properties
 		if (props.end() != props.find(element.first)) continue;
@@ -214,7 +214,7 @@ DirectPropertyMap PropertyTable::GetUnparsedProperties() const
 		// Read the element's value.
 		// Wrap the naked pointer (since the call site is required to acquire ownership)
 		// std::unique_ptr from C++11 would be preferred both as a wrapper and a return value.
-		boost::shared_ptr<Property> prop = boost::shared_ptr<Property>(ReadTypedProperty(*element.second));
+		std::shared_ptr<Property> prop = std::shared_ptr<Property>(ReadTypedProperty(*element.second));
 			
 		// Element could not be read. Skip it.
 		if (!prop) continue;

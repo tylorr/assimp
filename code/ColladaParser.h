@@ -332,7 +332,12 @@ const Type& ColladaParser::ResolveLibraryReference( const std::map<std::string, 
 {
 	typename std::map<std::string, Type>::const_iterator it = pLibrary.find( pURL);
 	if( it == pLibrary.end())
-		ThrowException( boost::str( boost::format( "Unable to resolve library reference \"%s\".") % pURL));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Unable to resolve library reference \"" << pURL << "\".";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 	return it->second;
 }
 

@@ -94,7 +94,10 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
 
 	if( !isNecessary )
 	{
-		DefaultLogger::get()->debug( boost::str( boost::format( "SplitByBoneCountProcess early-out: no meshes with more than %d bones.") % mMaxBoneCount));
+		std::ostringstream stringStream;
+		stringStream << "SplitByBoneCountProcess early-out: no meshes with more than " << mMaxBoneCount << " bones.";
+		const std::string message = stringStream.str();
+		DefaultLogger::get()->debug(message.c_str());
 		return;
 	}
 
@@ -142,7 +145,10 @@ void SplitByBoneCountProcess::Execute( aiScene* pScene)
 	// recurse through all nodes and translate the node's mesh indices to fit the new mesh array
 	UpdateNode( pScene->mRootNode);
 
-	DefaultLogger::get()->debug( boost::str( boost::format( "SplitByBoneCountProcess end: split %d meshes into %d submeshes.") % mSubMeshIndices.size() % meshes.size()));
+	std::ostringstream stringStream;
+	stringStream << "SplitByBoneCountProcess end: split " << mSubMeshIndices.size() << " meshes into " << meshes.size();
+	const std::string message = stringStream.str();
+	DefaultLogger::get()->debug(message.c_str());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -233,7 +239,12 @@ void SplitByBoneCountProcess::SplitMesh( const aiMesh* pMesh, std::vector<aiMesh
 		// create a new mesh to hold this subset of the source mesh
 		aiMesh* newMesh = new aiMesh;
 		if( pMesh->mName.length > 0 )
-			newMesh->mName.Set( boost::str( boost::format( "%s_sub%d") % pMesh->mName.data % poNewMeshes.size()));
+		{
+			std::ostringstream stringStream;
+			stringStream << pMesh->mName.data << "_sub" << poNewMeshes.size();
+			const std::string message = stringStream.str();
+			newMesh->mName.Set(message.c_str());
+		}
 		newMesh->mMaterialIndex = pMesh->mMaterialIndex;
 		newMesh->mPrimitiveTypes = pMesh->mPrimitiveTypes;
 		poNewMeshes.push_back( newMesh);

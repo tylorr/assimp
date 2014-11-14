@@ -271,7 +271,7 @@ bool RemoveVCProcess::ProcessMesh(aiMesh* pMesh)
 	}
 
 	// handle texture coordinates
-	register bool b = (0 != (configDeleteFlags & aiComponent_TEXCOORDS));
+	bool b = (0 != (configDeleteFlags & aiComponent_TEXCOORDS));
 	for (unsigned int i = 0, real = 0; real < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++real)
 	{
 		if (!pMesh->mTextureCoords[i])break;

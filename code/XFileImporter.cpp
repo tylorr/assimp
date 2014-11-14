@@ -102,7 +102,7 @@ const aiImporterDesc* XFileImporter::GetInfo () const
 void XFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene, IOSystem* pIOHandler)
 {
 	// read file into memory
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 	if( file.get() == NULL)
 		throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
@@ -586,7 +586,10 @@ void XFileImporter::ConvertMaterials( aiScene* pScene, std::vector<XFile::Materi
 
       if( oldMat.sceneIndex == SIZE_MAX )
       {
-        DefaultLogger::get()->warn( boost::str( boost::format( "Could not resolve global material reference \"%s\"") % oldMat.mName));
+      	std::ostringstream stringStream;
+      	stringStream << "Could not resolve global material reference \"" << oldMat.mName << "\"";
+      	const std::string message = stringStream.str();
+        DefaultLogger::get()->warn(message.c_str());
         oldMat.sceneIndex = 0;
       }
 

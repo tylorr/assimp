@@ -604,7 +604,7 @@ const aiScene* Importer::ReadFile( const char* _pFile, unsigned int pFlags)
 			return NULL;
 		}
 
-		boost::scoped_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
+		std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
 		if (profiler) {
 			profiler->BeginRegion("total");
 		}
@@ -772,7 +772,7 @@ const aiScene* Importer::ApplyPostProcessing(unsigned int pFlags)
 	}
 #endif // ! DEBUG
 
-	boost::scoped_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
+	std::unique_ptr<Profiler> profiler(GetPropertyInteger(AI_CONFIG_GLOB_MEASURE_TIME,0)?new Profiler():NULL);
 	for( unsigned int a = 0; a < pimpl->mPostProcessingSteps.size(); a++)	{
 
 		BaseProcess* process = pimpl->mPostProcessingSteps[a];

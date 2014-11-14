@@ -160,7 +160,7 @@ public:
 public:
 		
 	aiExportDataBlob* blob;
-	boost::shared_ptr< Assimp::IOSystem > mIOSystem;
+	std::shared_ptr< Assimp::IOSystem > mIOSystem;
 	bool mIsDefaultIOHandler;
 
 	/** Post processing steps we can apply at the imported data. */
@@ -230,10 +230,10 @@ const aiExportDataBlob* Exporter :: ExportToBlob(  const aiScene* pScene, const 
 	}
 
 
-	boost::shared_ptr<IOSystem> old = pimpl->mIOSystem;
+	std::shared_ptr<IOSystem> old = pimpl->mIOSystem;
 
 	BlobIOSystem* blobio = new BlobIOSystem();
-	pimpl->mIOSystem = boost::shared_ptr<IOSystem>( blobio );
+	pimpl->mIOSystem = std::shared_ptr<IOSystem>( blobio );
 
 	if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName())) {
 		pimpl->mIOSystem = old;
@@ -466,7 +466,7 @@ const aiExportFormatDesc* Exporter :: GetExportFormatDescription( size_t pIndex 
 // ------------------------------------------------------------------------------------------------
 aiReturn Exporter :: RegisterExporter(const ExportFormatEntry& desc)
 {
-	BOOST_FOREACH(const ExportFormatEntry& e, pimpl->mExporters) {
+	for (const ExportFormatEntry& e : pimpl->mExporters) {
 		if (!strcmp(e.mDescription.id,desc.mDescription.id)) {
 			return aiReturn_FAILURE;
 		}

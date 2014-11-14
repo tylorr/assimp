@@ -1,3 +1,6 @@
+# NOTE: Replaced Boost with c++11 features #
+
+
 Open Asset Import Library (assimp) 
 ========
 

@@ -191,14 +191,14 @@ namespace {
 		// If this assertion fails, signed int is not big enough to store a float on your platform.
 		//	Please correct the declaration of BinFloat a few lines above - but do it in a portable,
 		//	#ifdef'd manner!
-		BOOST_STATIC_ASSERT( sizeof(BinFloat) >= sizeof(float));
+		static_assert( sizeof(BinFloat) >= sizeof(float), "BinFloat is smaller than float");
 
 		#if defined( _MSC_VER)
 			// If this assertion fails, Visual C++ has finally moved to ILP64. This means that this
 			//	code has just become legacy code! Find out the current value of _MSC_VER and modify
 			//	the #if above so it evaluates false on the current and all upcoming VC versions (or
 			//	on the current platform, if LP64 or LLP64 are still used on other platforms).
-			BOOST_STATIC_ASSERT( sizeof(BinFloat) == sizeof(float));
+			static_assert( sizeof(BinFloat) == sizeof(float), "BinFloat does not equal size of float");
 
 			// This works best on Visual C++, but other compilers have their problems with it.
 			const BinFloat binValue = reinterpret_cast<BinFloat const &>(pValue);

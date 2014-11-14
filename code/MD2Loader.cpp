@@ -183,7 +183,7 @@ void MD2Importer::ValidateHeader( )
 void MD2Importer::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)
@@ -377,7 +377,7 @@ void MD2Importer::InternReadFile( const std::string& pFile,
 		for (unsigned int c = 0; c < 3;++c,++iCurrent)	{
 
 			// validate vertex indices
-			register unsigned int iIndex = (unsigned int)pcTriangles[i].vertexIndices[c];
+			unsigned int iIndex = (unsigned int)pcTriangles[i].vertexIndices[c];
 			if (iIndex >= m_pcHeader->numVertices)	{
 				DefaultLogger::get()->error("MD2: Vertex index is outside the allowed range");
 				iIndex = m_pcHeader->numVertices-1;

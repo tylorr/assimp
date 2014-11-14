@@ -47,7 +47,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iterator>
 #include <sstream>
-#include <boost/tuple/tuple.hpp>
 
 #include "FBXParser.h"
 #include "FBXConverter.h"
@@ -110,7 +109,7 @@ public:
 
 		if(doc.Settings().readAllMaterials) {
 			// unfortunately this means we have to evaluate all objects
-			BOOST_FOREACH(const ObjectMap::value_type& v,doc.Objects()) {
+			for (const ObjectMap::value_type& v : doc.Objects()) {
 
 				const Object* ob = v.second->Get();
 				if(!ob) {
@@ -174,7 +173,7 @@ private:
 		std::vector<aiNode*> nodes_chain;
 
 		try {
-			BOOST_FOREACH(const Connection* con, conns) {
+			for (const Connection* con : conns) {
 
 				// ignore object-property links
 				if(con->PropertyName().length()) {
@@ -209,7 +208,7 @@ private:
 					// preserve the name - people might have scripts etc. that rely
 					// on specific node names.
 					aiNode* name_carrier = NULL;
-					BOOST_FOREACH(aiNode* prenode, nodes_chain) {
+					for (aiNode* prenode : nodes_chain) {
 						if ( !strcmp(prenode->mName.C_Str(), original_name.c_str()) ) {
 							name_carrier = prenode;
 							break;
@@ -226,7 +225,7 @@ private:
 
 					// link all nodes in a row
 					aiNode* last_parent = &parent;
-					BOOST_FOREACH(aiNode* prenode, nodes_chain) {
+					for (aiNode* prenode : nodes_chain) {
 						ai_assert(prenode);
 
 						if(last_parent != &parent) {
@@ -279,7 +278,7 @@ private:
 	void ConvertLights(const Model& model)
 	{
 		const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
-		BOOST_FOREACH(const NodeAttribute* attr, node_attrs) {
+		for (const NodeAttribute* attr : node_attrs) {
 			const Light* const light = dynamic_cast<const Light*>(attr);
 			if(light) {
 				ConvertLight(model, *light);
@@ -292,7 +291,7 @@ private:
 	void ConvertCameras(const Model& model)
 	{
 		const std::vector<const NodeAttribute*>& node_attrs = model.GetAttributes();
-		BOOST_FOREACH(const NodeAttribute* attr, node_attrs) {
+		for (const NodeAttribute* attr : node_attrs) {
 			const Camera* const cam = dynamic_cast<const Camera*>(attr);
 			if(cam) {
 				ConvertCamera(model, *cam);
@@ -769,7 +768,7 @@ private:
 		data->Set(index++, "IsNull", model.IsNull() ? true : false);
 
 		// add unparsed properties to the node's metadata
-		BOOST_FOREACH(const DirectPropertyMap::value_type& prop, unparsedProperties) {
+		for (const DirectPropertyMap::value_type& prop : unparsedProperties) {
 
 			// Interpret the property as a concrete type
 			if (const TypedProperty<bool>* interpreted = prop.second->As<TypedProperty<bool> >())
@@ -797,7 +796,7 @@ private:
 		std::vector<unsigned int> meshes;
 		meshes.reserve(geos.size());
 
-		BOOST_FOREACH(const Geometry* geo, geos) {
+		for (const Geometry* geo : geos) {
 
 			const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*>(geo);
 			if(mesh) {
@@ -843,7 +842,7 @@ private:
 		const MatIndexArray& mindices = mesh.GetMaterialIndices();
 		if (doc.Settings().readMaterials && !mindices.empty()) {
 			const MatIndexArray::value_type base = mindices[0];
-			BOOST_FOREACH(MatIndexArray::value_type index, mindices) {
+			for (MatIndexArray::value_type index : mindices) {
 				if(index != base) {
 					return ConvertMeshMultiMaterial(mesh, model, node_global_transform);
 				}
@@ -897,7 +896,7 @@ private:
 		aiFace* fac = out_mesh->mFaces = new aiFace[faces.size()]();
 
 		unsigned int cursor = 0;
-		BOOST_FOREACH(unsigned int pcount, faces) {
+		for (unsigned int pcount : faces) {
 			aiFace& f = *fac++;
 			f.mNumIndices = pcount;
 			f.mIndices = new unsigned int[pcount];
@@ -971,7 +970,7 @@ private:
 			}
 
 			aiVector3D* out_uv = out_mesh->mTextureCoords[i] = new aiVector3D[vertices.size()];
-			BOOST_FOREACH(const aiVector2D& v, uvs) {
+			for (const aiVector2D& v : uvs) {
 				*out_uv++ = aiVector3D(v.x,v.y,0.0f);
 			}
 
@@ -1015,7 +1014,7 @@ private:
 		std::set<MatIndexArray::value_type> had;
 		std::vector<unsigned int> indices;
 
-		BOOST_FOREACH(MatIndexArray::value_type index, mindices) {
+		for (MatIndexArray::value_type index : mindices) {
 			if(had.find(index) == had.end()) {
 
 				indices.push_back(ConvertMeshMultiMaterial(mesh, model, index, node_global_transform));
@@ -1233,7 +1232,7 @@ private:
 
 		try {
 
-			BOOST_FOREACH(const Cluster* cluster, sk.Clusters()) {
+			for (const Cluster* cluster : sk.Clusters()) {
 				ai_assert(cluster);
 
 				const WeightIndexArray& indices = cluster->GetIndices();
@@ -1254,7 +1253,7 @@ private:
 
 				// now check if *any* of these weights is contained in the output mesh,
 				// taking notes so we don't need to do it twice.
-				BOOST_FOREACH(WeightIndexArray::value_type index, indices) {
+				for (WeightIndexArray::value_type index : indices) {
 
 					unsigned int count;
 					const unsigned int* const out_idx = geo.ToOutputVertexIndex(index, count);
@@ -1496,7 +1495,7 @@ private:
           uvIndex = -1;
           if (!mesh)
           {					
-					  BOOST_FOREACH(const MeshMap::value_type& v,meshes_converted) {
+					  for (const MeshMap::value_type& v : meshes_converted) {
 						  const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> (v.first);
 						  if(!mesh) {
 							  continue;
@@ -1615,7 +1614,7 @@ private:
 			  uvIndex = -1;
         if (!mesh)
         {					
-					BOOST_FOREACH(const MeshMap::value_type& v,meshes_converted) {
+					for (const MeshMap::value_type& v : meshes_converted) {
 						const MeshGeometry* const mesh = dynamic_cast<const MeshGeometry*> (v.first);
 						if(!mesh) {
 							continue;
@@ -1857,7 +1856,7 @@ private:
 		anim_fps = FrameRateToDouble(fps, custom);
 
 		const std::vector<const AnimationStack*>& animations = doc.AnimationStacks();
-		BOOST_FOREACH(const AnimationStack* stack, animations) {
+		for (const AnimationStack* stack : animations) {
 			ConvertAnimationStack(*stack);
 		}
 	}
@@ -1882,21 +1881,21 @@ private:
 
 		const aiString fn(fixed_name);
 
-		BOOST_FOREACH(aiCamera* cam, cameras) {
+		for (aiCamera* cam : cameras) {
 			if (cam->mName == fn) {
 				cam->mName.Set(new_name);
 				break;
 			}
 		}
 
-		BOOST_FOREACH(aiLight* light, lights) {
+		for (aiLight* light : lights) {
 			if (light->mName == fn) {
 				light->mName.Set(new_name);
 				break;
 			}
 		}
 
-		BOOST_FOREACH(aiAnimation* anim, animations) {
+		for (aiAnimation* anim : animations) {
 			for (unsigned int i = 0; i < anim->mNumChannels; ++i) {
 				aiNodeAnim* const na = anim->mChannels[i];
 				if (na->mNodeName == fn) {
@@ -1985,11 +1984,11 @@ private:
 			"Lcl Translation"
 		};
 		
-		BOOST_FOREACH(const AnimationLayer* layer, layers) {
+		for (const AnimationLayer* layer : layers) {
 			ai_assert(layer);
 
 			const AnimationCurveNodeList& nodes = layer->Nodes(prop_whitelist, 3);
-			BOOST_FOREACH(const AnimationCurveNode* node, nodes) {
+			for (const AnimationCurveNode* node : nodes) {
 				ai_assert(node);
 
 				const Model* const model = dynamic_cast<const Model*>(node->Target());
@@ -2012,7 +2011,7 @@ private:
 		double max_time = -1e10;
 
 		try {
-			BOOST_FOREACH(const NodeMap::value_type& kv, node_map) {
+			for (const NodeMap::value_type& kv : node_map) {
 				GenerateNodeAnimations(node_anims, 
 					kv.first, 
 					kv.second, 
@@ -2062,7 +2061,7 @@ private:
 		// sanity check whether the input is ok
 #ifdef ASSIMP_BUILD_DEBUG
 		{ const Object* target = NULL;
-		BOOST_FOREACH(const AnimationCurveNode* node, curves) {
+		for (const AnimationCurveNode* node : curves) {
 			if(!target) {
 				target = node->Target();
 			}
@@ -2071,7 +2070,7 @@ private:
 #endif
 
 		const AnimationCurveNode* curve_node = NULL;
-		BOOST_FOREACH(const AnimationCurveNode* node, curves) {
+		for (const AnimationCurveNode* node : curves) {
 			ai_assert(node);
 
 			if (node->TargetProperty().empty()) {
@@ -2555,7 +2554,7 @@ private:
 
 
 	// key (time), value, mapto (component index)
-	typedef boost::tuple< const KeyTimeList*, const KeyValueList*, unsigned int > KeyFrameList;
+	typedef std::tuple< const KeyTimeList*, const KeyValueList*, unsigned int > KeyFrameList;
 	typedef std::vector<KeyFrameList> KeyFrameListList;
 
 	
@@ -2566,11 +2565,11 @@ private:
 		KeyFrameListList inputs;
 		inputs.reserve(nodes.size()*3);
 
-		BOOST_FOREACH(const AnimationCurveNode* node, nodes) {
+		for (const AnimationCurveNode* node : nodes) {
 			ai_assert(node);
 
 			const AnimationCurveMap& curves = node->Curves();
-			BOOST_FOREACH(const AnimationCurveMap::value_type& kv, curves) {
+			for (const AnimationCurveMap::value_type& kv : curves) {
 
 				unsigned int mapto;
 				if (kv.first == "d|X") {
@@ -2590,7 +2589,7 @@ private:
 				const AnimationCurve* const curve = kv.second;
 				ai_assert(curve->GetKeys().size() == curve->GetValues().size() && curve->GetKeys().size());
 
-				inputs.push_back(boost::make_tuple(&curve->GetKeys(), &curve->GetValues(), mapto));
+				inputs.push_back(std::make_tuple(&curve->GetKeys(), &curve->GetValues(), mapto));
 			}
 		}
 		return inputs; // pray for NRVO :-)
@@ -2608,8 +2607,8 @@ private:
 		KeyTimeList keys;
 		
 		size_t estimate = 0;
-		BOOST_FOREACH(const KeyFrameList& kfl, inputs) {
-			estimate = std::max(estimate, kfl.get<0>()->size());
+		for (const KeyFrameList& kfl : inputs) {
+			estimate = std::max(estimate, std::get<0>(kfl)->size());
 		}
 
 		keys.reserve(estimate);
@@ -2624,8 +2623,8 @@ private:
 			for (size_t i = 0; i < count; ++i) {
 				const KeyFrameList& kfl = inputs[i];
 
-				if (kfl.get<0>()->size() > next_pos[i] && kfl.get<0>()->at(next_pos[i]) < min_tick) {
-					min_tick = kfl.get<0>()->at(next_pos[i]);
+				if (std::get<0>(kfl)->size() > next_pos[i] && std::get<0>(kfl)->at(next_pos[i]) < min_tick) {
+					min_tick = std::get<0>(kfl)->at(next_pos[i]);
 				}
 			}
 
@@ -2638,7 +2637,7 @@ private:
 				const KeyFrameList& kfl = inputs[i];
 
 
-				while(kfl.get<0>()->size() > next_pos[i] && kfl.get<0>()->at(next_pos[i]) == min_tick) {
+				while(std::get<0>(kfl)->size() > next_pos[i] && std::get<0>(kfl)->at(next_pos[i]) == min_tick) {
 					++next_pos[i];
 				}
 			}
@@ -2663,7 +2662,7 @@ private:
 
 		next_pos.resize(inputs.size(),0);
 
-		BOOST_FOREACH(KeyTimeList::value_type time, keys) {
+		for (KeyTimeList::value_type time : keys) {
 			float result[3] = {0.0f, 0.0f, 0.0f};
 			if(geom) {
 				result[0] = result[1] = result[2] = 1.0f;
@@ -2672,8 +2671,8 @@ private:
 			for (size_t i = 0; i < count; ++i) {
 				const KeyFrameList& kfl = inputs[i];
 
-				const size_t ksize = kfl.get<0>()->size();
-				if (ksize > next_pos[i] && kfl.get<0>()->at(next_pos[i]) == time) {
+				const size_t ksize = std::get<0>(kfl)->size();
+				if (ksize > next_pos[i] && std::get<0>(kfl)->at(next_pos[i]) == time) {
 					++next_pos[i]; 
 				}
 
@@ -2681,11 +2680,11 @@ private:
 				const size_t id1 = next_pos[i]==ksize ? ksize-1 : next_pos[i];
 
 				// use lerp for interpolation
-				const KeyValueList::value_type valueA = kfl.get<1>()->at(id0);
-				const KeyValueList::value_type valueB = kfl.get<1>()->at(id1);
+				const KeyValueList::value_type valueA = std::get<1>(kfl)->at(id0);
+				const KeyValueList::value_type valueB = std::get<1>(kfl)->at(id1);
 
-				const KeyTimeList::value_type timeA = kfl.get<0>()->at(id0);
-				const KeyTimeList::value_type timeB = kfl.get<0>()->at(id1);
+				const KeyTimeList::value_type timeA = std::get<0>(kfl)->at(id0);
+				const KeyTimeList::value_type timeB = std::get<0>(kfl)->at(id1);
 
 				// do the actual interpolation in double-precision arithmetics
 				// because it is a bit sensitive to rounding errors.
@@ -2693,10 +2692,10 @@ private:
 				const float interpValue = static_cast<float>(valueA + (valueB - valueA) * factor);
 
 				if(geom) {
-					result[kfl.get<2>()] *= interpValue;
+					result[std::get<2>(kfl)] *= interpValue;
 				}
 				else {
-					result[kfl.get<2>()] += interpValue;
+					result[std::get<2>(kfl)] += interpValue;
 				}
 			}
 
@@ -2725,7 +2724,7 @@ private:
 		ai_assert(keys.size());
 		ai_assert(valOut);
 
-		boost::scoped_array<aiVectorKey> temp(new aiVectorKey[keys.size()]);
+		std::unique_ptr<aiVectorKey[]> temp(new aiVectorKey[keys.size()]);
 		InterpolateKeys(temp.get(),keys,inputs,geom,maxTime, minTime);
 
 		aiMatrix4x4 m;

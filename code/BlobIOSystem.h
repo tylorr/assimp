@@ -213,7 +213,7 @@ public:
 
 	virtual ~BlobIOSystem()
 	{
-		BOOST_FOREACH(BlobEntry& blobby, blobs) {
+		for (BlobEntry& blobby : blobs) {
 			delete blobby.second;
 		}
 	}
@@ -232,7 +232,7 @@ public:
 	{
 		// one must be the master
 		aiExportDataBlob* master = NULL, *cur;
-		BOOST_FOREACH(const BlobEntry& blobby, blobs) {
+		for (const BlobEntry& blobby : blobs) {
 			if (blobby.first == AI_BLOBIO_MAGIC) {
 				master = blobby.second;
 				break;
@@ -246,7 +246,7 @@ public:
 		master->name.Set("");
 
 		cur = master;
-		BOOST_FOREACH(const BlobEntry& blobby, blobs) {
+		for (const BlobEntry& blobby : blobs) {
 			if (blobby.second == master) {
 				continue;
 			}

@@ -66,7 +66,7 @@ class Skeleton;
 
 // Typedefs
 typedef Assimp::MemoryIOStream MemoryStream;
-typedef boost::shared_ptr<MemoryStream> MemoryStreamPtr;
+typedef std::shared_ptr<MemoryStream> MemoryStreamPtr;
 typedef std::map<uint16_t, MemoryStreamPtr> VertexBufferBindings;
 
 // Ogre Vertex Element

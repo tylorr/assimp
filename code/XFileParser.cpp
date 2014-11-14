@@ -123,8 +123,13 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 		mIsBinaryFormat = true;
 		compressed = true;
 	}
-	else ThrowException( boost::str(boost::format("Unsupported xfile format '%c%c%c%c'") 
-		% P[8] % P[9] % P[10] % P[11]));
+	else
+	{ 
+		std::ostringstream stringStream;
+		stringStream << "Unsupported xfile format '" << P[8] << P[9] << P[10] << P[11] << "'";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 
 	// float size
 	mBinaryFloatSize = (unsigned int)(P[12] - 48) * 1000
@@ -133,8 +138,12 @@ XFileParser::XFileParser( const std::vector<char>& pBuffer)
 		+ (unsigned int)(P[15] - 48);
 
 	if( mBinaryFloatSize != 32 && mBinaryFloatSize != 64)
-		ThrowException( boost::str( boost::format( "Unknown float size %1% specified in xfile header.")
-			% mBinaryFloatSize));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Unknown float size " << mBinaryFloatSize << " specified in xfile header.";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 
 	// The x format specifies size in bits, but we work in bytes
 	mBinaryFloatSize /= 8;
@@ -457,7 +466,12 @@ void XFileParser::ParseDataObjectMesh( Mesh* pMesh)
 	{
 		unsigned int numIndices = ReadInt();
 		if( numIndices < 3)
-			ThrowException( boost::str( boost::format( "Invalid index count %1% for face %2%.") % numIndices % a));
+		{
+			std::ostringstream stringStream;
+			stringStream << "Invalid index count " << numIndices << " for face " << a << ".";
+			const std::string message = stringStream.str();
+			ThrowException(message.c_str());
+		}
 
 		// read indices
 		Face& face = pMesh->mPosFaces[a];
@@ -720,7 +734,7 @@ void XFileParser::ParseDataObjectMaterial( Material* pMaterial)
 	std::string matName;
 	readHeadOfDataObject( &matName);
 	if( matName.empty())
-		matName = std::string( "material") + boost::lexical_cast<std::string>( mLineNumber);
+		matName = std::string( "material") + std::to_string( mLineNumber);
 	pMaterial->mName = matName;
 	pMaterial->mIsReference = false;
 
@@ -918,7 +932,12 @@ void XFileParser::ParseDataObjectAnimationKey( AnimBone* pAnimBone)
 			}
 
 			default:
-				ThrowException( boost::str( boost::format( "Unknown key type %1% in animation.") % keyType));
+				{
+					std::ostringstream stringStream;
+					stringStream << "Unknown key type " << keyType << " in animation.";
+					const std::string message = stringStream.str();
+					ThrowException(message.c_str());
+				}
 				break;
 		} // end switch
 
@@ -1433,7 +1452,12 @@ void XFileParser::ThrowException( const std::string& pText)
 	if( mIsBinaryFormat)
 		throw DeadlyImportError( pText);
 	else
-		throw DeadlyImportError( boost::str( boost::format( "Line %d: %s") % mLineNumber % pText));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Line " << mLineNumber << ": " << pText;
+		const std::string message = stringStream.str();
+		throw DeadlyImportError(message.c_str());
+	}
 }
 
 

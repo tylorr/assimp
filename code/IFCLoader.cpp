@@ -46,7 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
 
 #include <iterator>
-#include <boost/tuple/tuple.hpp>
 
 #ifndef ASSIMP_BUILD_NO_COMPRESSED_IFC
 #	include "../contrib/unzip/unzip.h"
@@ -166,7 +165,7 @@ void IFCImporter::SetupProperties(const Importer* pImp)
 void IFCImporter::InternReadFile( const std::string& pFile, 
 	aiScene* pScene, IOSystem* pIOHandler)
 {
-	boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile));
+	std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile));
 	if (!stream) {
 		ThrowException("Could not open file for reading");
 	}
@@ -231,7 +230,7 @@ void IFCImporter::InternReadFile( const std::string& pFile,
 #endif
 	}
 
-	boost::scoped_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));
+	std::unique_ptr<STEP::DB> db(STEP::ReadFileHeader(stream));
 	const STEP::HeaderInfo& head = static_cast<const STEP::DB&>(*db).GetHeader();
 
 	if(!head.fileSchema.size() || head.fileSchema.substr(0,3) != "IFC") {
@@ -381,7 +380,7 @@ void SetUnits(ConversionData& conv)
 void SetCoordinateSpace(ConversionData& conv)
 {
 	const IfcRepresentationContext* fav = NULL;
-	BOOST_FOREACH(const IfcRepresentationContext& v, conv.proj.RepresentationContexts) {
+	for (const IfcRepresentationContext& v : conv.proj.RepresentationContexts) {
 		fav = &v;
 		// Model should be the most suitable type of context, hence ignore the others 
 		if (v.ContextType && v.ContextType.Get() == "Model") { 
@@ -431,7 +430,7 @@ void GetAbsTransform(aiMatrix4x4& out, const aiNode* nd, ConversionData& conv)
 bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector< aiNode* >& subnodes_src, ConversionData& conv)
 {
 	// insert a custom node here, the cartesian transform operator is simply a conventional transformation matrix
-	std::auto_ptr<aiNode> nd(new aiNode());
+	std::unique_ptr<aiNode> nd(new aiNode());
 	nd->mName.Set("IfcMappedItem");
 		
 	// handle the Cartesian operator
@@ -448,7 +447,7 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
 	if (conv.apply_openings) {
 		IfcMatrix4 minv = msrc;
 		minv.Inverse();
-		BOOST_FOREACH(TempOpening& open,*conv.apply_openings){
+		for (TempOpening& open : *conv.apply_openings){
 			open.Transform(minv);
 		}
 	}
@@ -456,7 +455,7 @@ bool ProcessMappedItem(const IfcMappedItem& mapped, aiNode* nd_src, std::vector<
 	const IfcRepresentation& repr = mapped.MappingSource->MappedRepresentation;
 
 	bool got = false;
-	BOOST_FOREACH(const IfcRepresentationItem& item, repr.Items) {
+	for (const IfcRepresentationItem& item : repr.Items) {
 		if(!ProcessRepresentationItem(item,meshes,conv)) {
 			IFCImporter::LogWarn("skipping mapped entity of type " + item.GetClassName() + ", no representations could be generated");
 		}
@@ -567,9 +566,9 @@ void ProcessProductRepresentation(const IfcProduct& el, aiNode* nd, std::vector<
 	std::vector<const IfcRepresentation*> repr_ordered(src.size());
 	std::copy(src.begin(),src.end(),repr_ordered.begin());
 	std::sort(repr_ordered.begin(),repr_ordered.end(),RateRepresentationPredicate());
-	BOOST_FOREACH(const IfcRepresentation* repr, repr_ordered) {
+	for (const IfcRepresentation* repr : repr_ordered) {
 		bool res = false;
-		BOOST_FOREACH(const IfcRepresentationItem& item, repr->Items) {
+		for (const IfcRepresentationItem& item : repr->Items) {
 			if(const IfcMappedItem* const geo = item.ToPtr<IfcMappedItem>()) {
 				res = ProcessMappedItem(*geo,nd,subnodes,conv) || res;
 			}
@@ -592,7 +591,7 @@ void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionD
 	const std::string& prefix = "", 
 	unsigned int nest = 0) 
 {
-	BOOST_FOREACH(const IfcProperty& property, set) {
+	for (const IfcProperty& property : set) {
 		const std::string& key = prefix.length() > 0 ? (prefix + "." + property.Name) : property.Name;
 		if (const IfcPropertySingleValue* const singleValue = property.ToPtr<IfcPropertySingleValue>()) {
 			if (singleValue->NominalValue) {
@@ -618,7 +617,7 @@ void ProcessMetadata(const ListOf< Lazy< IfcProperty >, 1, 0 >& set, ConversionD
 			std::stringstream ss;
 			ss << "[";
 			unsigned index=0;
-			BOOST_FOREACH(const IfcValue::Out& v, listValue->ListValues) {
+			for (const IfcValue::Out& v : listValue->ListValues) {
 				if (!v) continue;
 				if (const EXPRESS::STRING* str = v->ToPtr<EXPRESS::STRING>()) {
 					std::string value = static_cast<std::string>(*str);
@@ -715,7 +714,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 			data->mValues = new aiMetadataEntry[data->mNumProperties]();
 
 			unsigned int index = 0;
-			BOOST_FOREACH(const Metadata::value_type& kv, properties)
+			for (const Metadata::value_type& kv : properties)
 				data->Set(index++, kv.first, aiString(kv.second));
 
 			nd->mMetaData = data;
@@ -753,7 +752,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 				if(cont->RelatingStructure->GetID() != el.GetID()) {
 					continue;
 				}
-				BOOST_FOREACH(const IfcProduct& pro, cont->RelatedElements) {		
+				for (const IfcProduct& pro : cont->RelatedElements) {		
 					if(const IfcOpeningElement* const open = pro.ToPtr<IfcOpeningElement>()) {
 						// IfcOpeningElement is handled below. Sadly we can't use it here as is:
 						// The docs say that opening elements are USUALLY attached to building storey,
@@ -773,7 +772,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 					const IfcFeatureElementSubtraction& open = fills->RelatedOpeningElement;
 
 					// move opening elements to a separate node since they are semantically different than elements that are just 'contained'
-					std::auto_ptr<aiNode> nd_aggr(new aiNode());
+					std::unique_ptr<aiNode> nd_aggr(new aiNode());
 					nd_aggr->mName.Set("$RelVoidsElement");
 					nd_aggr->mParent = nd.get();
 
@@ -796,7 +795,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 							}
 
 							// we need all openings to be in the local space of *this* node, so transform them
-							BOOST_FOREACH(TempOpening& op,openings_local) {
+							for (TempOpening& op : openings_local) {
 								op.Transform( myInv*nd_aggr->mChildren[0]->mTransformation);
 								openings.push_back(op);
 							}
@@ -818,14 +817,14 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 				}
 
 				// move aggregate elements to a separate node since they are semantically different than elements that are just 'contained'
-				std::auto_ptr<aiNode> nd_aggr(new aiNode());
+				std::unique_ptr<aiNode> nd_aggr(new aiNode());
 				nd_aggr->mName.Set("$RelAggregates");
 				nd_aggr->mParent = nd.get();
 
 				nd_aggr->mTransformation = nd->mTransformation;
 
 				nd_aggr->mChildren = new aiNode*[aggr->RelatedObjects.size()]();
-				BOOST_FOREACH(const IfcObjectDefinition& def, aggr->RelatedObjects) {
+				for (const IfcObjectDefinition& def : aggr->RelatedObjects) {
 					if(const IfcProduct* const prod = def.ToPtr<IfcProduct>()) {
 
 						aiNode* const ndnew = ProcessSpatialStructure(nd_aggr.get(),*prod,conv,NULL);
@@ -849,7 +848,7 @@ aiNode* ProcessSpatialStructure(aiNode* parent, const IfcProduct& el, Conversion
 
 		if (subnodes.size()) {
 			nd->mChildren = new aiNode*[subnodes.size()]();
-			BOOST_FOREACH(aiNode* nd2, subnodes) {
+			for (aiNode* nd2 : subnodes) {
 				nd->mChildren[nd->mNumChildren++] = nd2;
 				nd2->mParent = nd.get();
 			}
@@ -889,7 +888,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 	}
 
 	
-	BOOST_FOREACH(const STEP::LazyObject* lz, *range) {
+	for (const STEP::LazyObject* lz : *range) {
 		const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
 		if(!prod) {
 			continue;
@@ -902,7 +901,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 		for(;range.first != range.second; ++range.first) {
 			if(const IfcRelAggregates* const aggr = conv.db.GetObject((*range.first).second)->ToPtr<IfcRelAggregates>()) {
 			
-				BOOST_FOREACH(const IfcObjectDefinition& def, aggr->RelatedObjects) {
+				for (const IfcObjectDefinition& def : aggr->RelatedObjects) {
 					// comparing pointer values is not sufficient, we would need to cast them to the same type first
 					// as there is multiple inheritance in the game.
 					if (def.GetID() == prod->GetID()) { 
@@ -919,7 +918,7 @@ void ProcessSpatialStructures(ConversionData& conv)
 
 	
 	IFCImporter::LogWarn("failed to determine primary site element, taking the first IfcSite");
-	BOOST_FOREACH(const STEP::LazyObject* lz, *range) {
+	for (const STEP::LazyObject* lz : *range) {
 		const IfcSpatialStructureElement* const prod = lz->ToPtr<IfcSpatialStructureElement>();
 		if(!prod) {
 			continue;

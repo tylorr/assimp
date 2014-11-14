@@ -353,7 +353,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 
 	// we need to split all meshes by their materials
 	for (std::vector<D3DS::Mesh>::iterator i =  mScene->mMeshes.begin(); i != mScene->mMeshes.end();++i)	{
-		boost::scoped_array< std::vector<unsigned int> > aiSplit(new std::vector<unsigned int>[mScene->mMaterials.size()]);
+		std::unique_ptr<std::vector<unsigned int>[]> aiSplit(new std::vector<unsigned int>[mScene->mMaterials.size()]);
 
 		name.length = ASSIMP_itoa10(name.data,num++);
 
@@ -396,7 +396,7 @@ void Discreet3DSImporter::ConvertMeshes(aiScene* pcOut)
 			}
 			for (unsigned int q = 0, base = 0; q < aiSplit[p].size();++q)
 			{
-				register unsigned int index = aiSplit[p][q];
+				unsigned int index = aiSplit[p][q];
 				aiFace& face = meshOut->mFaces[q];
 
 				face.mIndices = new unsigned int[3];

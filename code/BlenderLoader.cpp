@@ -159,7 +159,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 #endif
 
 	FileDatabase file; 
-	boost::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
+	std::shared_ptr<IOStream> stream(pIOHandler->Open(pFile,"rb"));
 	if (!stream) {
 		ThrowException("Could not open file for reading");
 	}
@@ -185,7 +185,7 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 
 		// http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
 		stream->Seek(0L,aiOrigin_SET);
-		boost::shared_ptr<StreamReaderLE> reader = boost::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
+		std::shared_ptr<StreamReaderLE> reader = std::shared_ptr<StreamReaderLE>(new StreamReaderLE(stream));
 
 		// build a zlib stream
 		z_stream zstream;
@@ -255,9 +255,9 @@ void BlenderImporter::InternReadFile( const std::string& pFile,
 }
 
 // ------------------------------------------------------------------------------------------------
-void BlenderImporter::ParseBlendFile(FileDatabase& out, boost::shared_ptr<IOStream> stream) 
+void BlenderImporter::ParseBlendFile(FileDatabase& out, std::shared_ptr<IOStream> stream) 
 {
-	out.reader = boost::shared_ptr<StreamReaderAny>(new StreamReaderAny(stream,out.little));
+	out.reader = std::shared_ptr<StreamReaderAny>(new StreamReaderAny(stream,out.little));
 
 	DNAParser dna_reader(out);
 	const DNA* dna = NULL;
@@ -300,7 +300,7 @@ void BlenderImporter::ExtractScene(Scene& out, const FileDatabase& file)
 	const Structure& ss = file.dna.structures[(*it).second];
 
 	// we need a scene somewhere to start with. 
-	for_each(const FileBlockHead& bl,file.entries) {
+	for (const FileBlockHead& bl : file.entries) {
 
 		// Fix: using the DNA index is more reliable to locate scenes
 		//if (bl.id == "SC") {
@@ -337,7 +337,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
 	// the file. This is terrible. Here, we're first looking for
 	// all objects which don't have parent objects at all -
 	std::deque<const Object*> no_parents;
-	for (boost::shared_ptr<Base> cur = boost::static_pointer_cast<Base> ( in.base.first ); cur; cur = cur->next) {
+	for (std::shared_ptr<Base> cur = std::static_pointer_cast<Base> ( in.base.first ); cur; cur = cur->next) {
 		if (cur->object) {
 			if(!cur->object->parent) {
 				no_parents.push_back(cur->object.get());
@@ -345,7 +345,7 @@ void BlenderImporter::ConvertBlendFile(aiScene* out, const Scene& in,const FileD
 			else conv.objects.insert(cur->object.get());
 		}
 	}
-	for (boost::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
+	for (std::shared_ptr<Base> cur = in.basact; cur; cur = cur->next) {
 		if (cur->object) {
 			if(cur->object->parent) {
 				conv.objects.insert(cur->object.get());
@@ -555,13 +555,13 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 
 	// add a default material if necessary
 	unsigned int index = static_cast<unsigned int>( -1 );
-	for_each( aiMesh* mesh, conv_data.meshes.get() ) {
+	for ( aiMesh* mesh : conv_data.meshes.get() ) {
 		if (mesh->mMaterialIndex == static_cast<unsigned int>( -1 )) {
 
 			if (index == static_cast<unsigned int>( -1 )) {
 
 				// ok, we need to add a dedicated default material for some poor material-less meshes
-				boost::shared_ptr<Material> p(new Material());
+				std::shared_ptr<Material> p(new Material());
 				strcpy( p->id.name+2, AI_DEFAULT_MATERIAL_NAME );
 
 				p->r = p->g = p->b = 0.6f;
@@ -582,7 +582,7 @@ void BlenderImporter::BuildMaterials(ConversionData& conv_data)
 		}
 	}
 
-	for_each(boost::shared_ptr<Material> mat, conv_data.materials_raw) {
+	for (std::shared_ptr<Material> mat : conv_data.materials_raw) {
 
 		// reset per material global counters
 		for (size_t i = 0; i < sizeof(conv_data.next_texture)/sizeof(conv_data.next_texture[0]);++i) {
@@ -708,7 +708,7 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 	temp->reserve(temp->size() + per_mat.size());
 
 	std::map<size_t,size_t> mat_num_to_mesh_idx;
-	for_each(MyPair& it, per_mat) {
+	for (MyPair& it : per_mat) {
 
 		mat_num_to_mesh_idx[it.first] = temp->size();
 		temp->push_back(new aiMesh());
@@ -735,8 +735,8 @@ void BlenderImporter::ConvertMesh(const Scene& /*in*/, const Object* /*obj*/, co
 				ThrowException("Material index is out of range");
 			}
 
-			boost::shared_ptr<Material> mat = mesh->mat[it.first];
-			const std::deque< boost::shared_ptr<Material> >::iterator has = std::find(
+			std::shared_ptr<Material> mat = mesh->mat[it.first];
+			const std::deque< std::shared_ptr<Material> >::iterator has = std::find(
 					conv_data.materials_raw.begin(),
 					conv_data.materials_raw.end(),mat
 			);
@@ -1137,7 +1137,7 @@ aiNode* BlenderImporter::ConvertNode(const Scene& in, const Object* obj, Convers
 	if (children.size()) {
 		node->mNumChildren = static_cast<unsigned int>(children.size());
 		aiNode** nd = node->mChildren = new aiNode*[node->mNumChildren]();
-		for_each (const Object* nobj,children) {
+		for (const Object* nobj : children) {
 			*nd = ConvertNode(in,nobj,conv_data,node->mTransformation * parentTransform);
 			(*nd++)->mParent = node;
 		}

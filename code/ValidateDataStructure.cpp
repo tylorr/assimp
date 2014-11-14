@@ -461,7 +461,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
 			ReportError("aiMesh::mBones is NULL (aiMesh::mNumBones is %i)",
 				pMesh->mNumBones);
 		}
-		boost::scoped_array<float> afSum(NULL);
+		std::unique_ptr<float[]> afSum(nullptr);
 		if (pMesh->mNumVertices)
 		{
 			afSum.reset(new float[pMesh->mNumVertices]);

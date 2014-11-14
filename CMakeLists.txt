@@ -1,6 +1,10 @@
 cmake_minimum_required( VERSION 2.6 )
 PROJECT( Assimp )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+add_definitions(-D_USE_MATH_DEFINES)
+
 # Define here the needed parameters
 set (ASSIMP_VERSION_MAJOR 3)
 set (ASSIMP_VERSION_MINOR 1)
@@ -110,16 +114,16 @@ IF ( ASSIMP_ENABLE_BOOST_WORKAROUND )
 ELSE ( ASSIMP_ENABLE_BOOST_WORKAROUND )
 	SET( Boost_DETAILED_FAILURE_MSG ON )
 	SET( Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0" "1.48.0" "1.48" "1.49" "1.49.0" "1.50" "1.50.0" "1.51" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" )	
-	FIND_PACKAGE( Boost )
-	IF ( NOT Boost_FOUND )
-		MESSAGE( FATAL_ERROR
-			"Boost libraries (http://www.boost.org/) not found. "
-			"You can build a non-boost version of Assimp with slightly reduced "
-      "functionality by specifying -DASSIMP_ENABLE_BOOST_WORKAROUND=ON."
-		)
-	ENDIF ( NOT Boost_FOUND )
+	# FIND_PACKAGE( Boost )
+	# IF ( NOT Boost_FOUND )
+	# 	MESSAGE( FATAL_ERROR
+	# 		"Boost libraries (http://www.boost.org/) not found. "
+	# 		"You can build a non-boost version of Assimp with slightly reduced "
+ #      "functionality by specifying -DASSIMP_ENABLE_BOOST_WORKAROUND=ON."
+	# 	)
+	# ENDIF ( NOT Boost_FOUND )
 
-	INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
+	# INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
 ENDIF ( ASSIMP_ENABLE_BOOST_WORKAROUND )
 
 # cmake configuration files
@@ -192,7 +196,7 @@ MARK_AS_ADVANCED ( ASSIMP_BUILD_ARCHITECTURE ASSIMP_BUILD_COMPILER )
 ADD_SUBDIRECTORY( code/ )
 option ( ASSIMP_BUILD_ASSIMP_TOOLS
 	"If the supplementary tools for Assimp are built in addition to the library."
-	ON
+	OFF
 )
 IF ( ASSIMP_BUILD_ASSIMP_TOOLS )
 	IF ( WIN32 )
@@ -215,7 +219,7 @@ ENDIF ( ASSIMP_BUILD_SAMPLES )
 
 option ( ASSIMP_BUILD_TESTS
 	"If the test suite for Assimp is built in addition to the library."
-	ON
+	OFF
 )
 	
 IF ( ASSIMP_BUILD_TESTS )

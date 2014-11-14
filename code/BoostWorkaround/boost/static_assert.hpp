@@ -1,8 +1,8 @@
 
-#ifndef AI_BOOST_STATIC_ASSERT_INCLUDED
-#define AI_BOOST_STATIC_ASSERT_INCLUDED
+#ifndef AI_static_assert_INCLUDED
+#define AI_static_assert_INCLUDED
 
-#ifndef BOOST_STATIC_ASSERT
+#ifndef static_assert
 
 namespace boost {
 	namespace detail {
@@ -13,8 +13,8 @@ namespace boost {
 }
 
 
-#define BOOST_STATIC_ASSERT(eval) \
+#define static_assert(eval) \
 {boost::detail::static_assertion_failure<(eval)> assert_dummy;(void)assert_dummy;}
 
 #endif
-#endif // !! AI_BOOST_STATIC_ASSERT_INCLUDED
+#endif // !! AI_static_assert_INCLUDED

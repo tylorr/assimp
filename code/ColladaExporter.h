@@ -100,7 +100,7 @@ protected:
 	void PopTag() { ai_assert( startstr.length() > 1); startstr.erase( startstr.length() - 2); }
 
 	/// Creates a mesh ID for the given mesh
-	std::string GetMeshId( size_t pIndex) const { return std::string( "meshId" ) + boost::lexical_cast<std::string> (pIndex); }
+	std::string GetMeshId( size_t pIndex) const { return std::string( "meshId" ) + std::to_string(pIndex); }
 
 public:
 	/// Stringstream to write all output into

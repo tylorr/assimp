@@ -109,8 +109,8 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode& out, ConversionData& conv_d
 	// we're allowed to dereference the pointers without risking to crash. We might still be
 	// invoking UB btw - we're assuming that the ModifierData member of the respective modifier
 	// structures is at offset sizeof(vftable) with no padding.
-	const SharedModifierData* cur = boost::static_pointer_cast<const SharedModifierData> ( orig_object.modifiers.first.get() );
-	for (; cur; cur =  boost::static_pointer_cast<const SharedModifierData> ( cur->modifier.next.get() ), ++ful) {
+	const SharedModifierData* cur = static_cast<const SharedModifierData*> ( orig_object.modifiers.first.get() );
+	for (; cur; cur =  static_cast<const SharedModifierData*> ( cur->modifier.next.get() ), ++ful) {
 		ai_assert(cur->dna_type);
 
 		const Structure* s = conv_data.db.dna.Get( cur->dna_type );
@@ -149,7 +149,7 @@ void BlenderModifierShowcase::ApplyModifiers(aiNode& out, ConversionData& conv_d
 
 			BlenderModifier* const modifier = *curmod;
 			if(modifier->IsActive(dat)) {
-				modifier->DoIt(out,conv_data,*boost::static_pointer_cast<const ElemBase>(cur),in,orig_object);
+				modifier->DoIt(out,conv_data,*static_cast<const ElemBase *>(cur),in,orig_object);
 				cnt++;
 
 				curgod = NULL;
@@ -308,11 +308,11 @@ void  BlenderModifier_Subdivision :: DoIt(aiNode& out, ConversionData& conv_data
 		return;
 	};
 
-	boost::scoped_ptr<Subdivider> subd(Subdivider::Create(algo));
+	std::unique_ptr<Subdivider> subd(Subdivider::Create(algo));
 	ai_assert(subd);
 
 	aiMesh** const meshes = &conv_data.meshes[conv_data.meshes->size() - out.mNumMeshes];
-	boost::scoped_array<aiMesh*> tempmeshes(new aiMesh*[out.mNumMeshes]());
+	std::unique_ptr<aiMesh*[]> tempmeshes(new aiMesh*[out.mNumMeshes]());
 
 	subd->Subdivide(meshes,out.mNumMeshes,tempmeshes.get(),std::max( mir.renderLevels, mir.levels ),true);
 	std::copy(tempmeshes.get(),tempmeshes.get()+out.mNumMeshes,meshes);

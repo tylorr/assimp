@@ -52,10 +52,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileLogStream.h"
 
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-#	include <boost/thread/thread.hpp>
-#	include <boost/thread/mutex.hpp>
+#	include <thread>
+#	include <mutex>
 
-boost::mutex loggerMutex;
+std::mutex loggerMutex;
 #endif
 
 namespace Assimp	{
@@ -130,7 +130,7 @@ Logger *DefaultLogger::create(const char* name /*= "AssimpLog.txt"*/,
 {
 	// enter the mutex here to avoid concurrency problems
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-	boost::mutex::scoped_lock lock(loggerMutex);
+	std::lock_guard<std::mutex> lock(loggerMutex);
 #endif
 
 	if (m_pLogger && !isNullLogger() )
@@ -209,7 +209,7 @@ void DefaultLogger::set( Logger *logger )
 {
 	// enter the mutex here to avoid concurrency problems
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-	boost::mutex::scoped_lock lock(loggerMutex);
+	std::lock_guard<std::mutex> lock(loggerMutex);
 #endif
 
 	if (!logger)logger = &s_pNullLogger;
@@ -238,7 +238,7 @@ void DefaultLogger::kill()
 {
 	// enter the mutex here to avoid concurrency problems
 #ifndef ASSIMP_BUILD_SINGLETHREADED
-	boost::mutex::scoped_lock lock(loggerMutex);
+	std::lock_guard<std::mutex> lock(loggerMutex);
 #endif
 
 	if (m_pLogger == &s_pNullLogger)return;

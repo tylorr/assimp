@@ -107,7 +107,7 @@ Cluster::Cluster(uint64_t id, const Element& element, const Document& doc, const
 
 	// read assigned node
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"Model");
-	BOOST_FOREACH(const Connection* con, conns) {
+	for (const Connection* con : conns) {
 		const Model* const mod = ProcessSimpleConnection<Model>(*con, false, "Model -> Cluster", element);
 		if(mod) {
 			node = mod;
@@ -143,7 +143,7 @@ Skin::Skin(uint64_t id, const Element& element, const Document& doc, const std::
 	const std::vector<const Connection*>& conns = doc.GetConnectionsByDestinationSequenced(ID(),"Deformer");
 
 	clusters.reserve(conns.size());
-	BOOST_FOREACH(const Connection* con, conns) {
+	for (const Connection* con : conns) {
 
 		const Cluster* const cluster = ProcessSimpleConnection<Cluster>(*con, false, "Cluster -> Skin", element);
 		if(cluster) {

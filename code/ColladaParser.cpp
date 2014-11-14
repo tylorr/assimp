@@ -66,12 +66,12 @@ ColladaParser::ColladaParser( IOSystem* pIOHandler, const std::string& pFile)
 	mFormat = FV_1_5_n;
 
   // open the file
-  boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+  std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
   if( file.get() == NULL)
     throw DeadlyImportError( "Failed to open file " + pFile + ".");
 
 	// generate a XML reader for it
-  boost::scoped_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
+  std::unique_ptr<CIrrXML_IOStreamReader> mIOWrapper( new CIrrXML_IOStreamReader( file.get()));
 	mReader = irr::io::createIrrXMLReader( mIOWrapper.get());
 	if( !mReader)
 		ThrowException( "Collada: Unable to open file.");
@@ -140,7 +140,10 @@ void ColladaParser::ReadContents()
 				ReadStructure();
 			} else
 			{
-				DefaultLogger::get()->debug( boost::str( boost::format( "Ignoring global element <%s>.") % mReader->getNodeName()));
+				std::ostringstream stringStream;
+				stringStream << "Ignoring global element <" << mReader->getNodeName() << ">.";
+				const std::string message = stringStream.str();
+				DefaultLogger::get()->debug(message.c_str());
 				SkipElement();
 			}
 		} else
@@ -554,7 +557,12 @@ void ColladaParser::ReadControllerJoints( Collada::Controller& pController)
 
 				// local URLS always start with a '#'. We don't support global URLs
 				if( attrSource[0] != '#')
-					ThrowException( boost::str( boost::format( "Unsupported URL format in \"%s\" in source attribute of <joints> data <input> element") % attrSource));
+				{
+					std::ostringstream stringStream;
+					stringStream << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <joints> data <input> element";
+					const std::string message = stringStream.str();
+					ThrowException(message.c_str());
+				}
 				attrSource++;
 
 				// parse source URL to corresponding source
@@ -563,7 +571,12 @@ void ColladaParser::ReadControllerJoints( Collada::Controller& pController)
 				else if( strcmp( attrSemantic, "INV_BIND_MATRIX") == 0)
 					pController.mJointOffsetMatrixSource = attrSource;
 				else
-					ThrowException( boost::str( boost::format( "Unknown semantic \"%s\" in <joints> data <input> element") % attrSemantic));
+				{
+					std::ostringstream stringStream;
+					stringStream << "Unknown semantic \"" << attrSemantic << "\" in <joints> data <input> element";
+					const std::string message = stringStream.str();
+					ThrowException(message.c_str());
+				}
 
 				// skip inner data, if present
 				if( !mReader->isEmptyElement())
@@ -613,7 +626,12 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 
 				// local URLS always start with a '#'. We don't support global URLs
 				if( attrSource[0] != '#')
-					ThrowException( boost::str( boost::format( "Unsupported URL format in \"%s\" in source attribute of <vertex_weights> data <input> element") % attrSource));
+				{
+					std::ostringstream stringStream;
+					stringStream << "Unsupported URL format in \"" << attrSource << "\" in source attribute of <vertex_weights> data <input> element";
+					const std::string message = stringStream.str();
+					ThrowException(message.c_str());
+				}
 				channel.mAccessor = attrSource + 1;
 
 				// parse source URL to corresponding source
@@ -622,7 +640,12 @@ void ColladaParser::ReadControllerWeights( Collada::Controller& pController)
 				else if( strcmp( attrSemantic, "WEIGHT") == 0)
 					pController.mWeightInputWeights = channel;
 				else
-					ThrowException( boost::str( boost::format( "Unknown semantic \"%s\" in <vertex_weights> data <input> element") % attrSemantic));
+				{
+					std::ostringstream stringStream;
+					stringStream << "Unknown semantic \"" << attrSemantic << "\" in <vertex_weights> data <input> element";
+					const std::string message = stringStream.str();
+					ThrowException(message.c_str());
+				}
 
 				// skip inner data, if present
 				if( !mReader->isEmptyElement())
@@ -1732,7 +1755,12 @@ void ColladaParser::ReadAccessor( const std::string& pID)
 	int attrSource = GetAttribute( "source");
 	const char* source = mReader->getAttributeValue( attrSource);
 	if( source[0] != '#')
-		ThrowException( boost::str( boost::format( "Unknown reference format in url \"%s\" in source attribute of <accessor> element.") % source));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Unknown reference format in url \"" << source << "\" in source attribute of <accessor> element.";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 	int attrCount = GetAttribute( "count");
 	unsigned int count = (unsigned int) mReader->getAttributeValueAsInt( attrCount);
 	int attrOffset = TestAttribute( "offset");
@@ -1814,7 +1842,10 @@ void ColladaParser::ReadAccessor( const std::string& pID)
 				SkipElement();
 			} else
 			{
-				ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <accessor>") % mReader->getNodeName()));
+				std::ostringstream stringStream;
+				stringStream << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <accessor>";
+				const std::string message = stringStream.str();
+				ThrowException(message.c_str());
 			}
 		} 
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
@@ -1844,7 +1875,10 @@ void ColladaParser::ReadVertexData( Mesh* pMesh)
 				ReadInputChannel( pMesh->mPerVertexData);
 			} else
 			{
-				ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <vertices>") % mReader->getNodeName()));
+				std::ostringstream stringStream;
+				stringStream << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <vertices>";
+				const std::string message = stringStream.str();
+				ThrowException(message.c_str());
 			}
 		} 
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
@@ -1937,13 +1971,21 @@ void ColladaParser::ReadIndexData( Mesh* pMesh)
 				}
 			} else
 			{
-				ThrowException( boost::str( boost::format( "Unexpected sub element <%s> in tag <%s>") % mReader->getNodeName() % elementName));
+				std::ostringstream stringStream;
+				stringStream << "Unexpected sub element <" << mReader->getNodeName() << "> in tag <" << elementName << ">";
+				const std::string message = stringStream.str();
+				ThrowException(message.c_str());
 			}
 		} 
 		else if( mReader->getNodeType() == irr::io::EXN_ELEMENT_END)
 		{
 			if( mReader->getNodeName() != elementName)
-				ThrowException( boost::str( boost::format( "Expected end of <%s> element.") % elementName));
+			{
+				std::ostringstream stringStream;
+				stringStream << "Expected end of <" << elementName << "> element.";
+				const std::string message = stringStream.str();
+				ThrowException(message.c_str());
+			}
 
 			break;
 		}
@@ -1965,7 +2007,12 @@ void ColladaParser::ReadInputChannel( std::vector<InputChannel>& poChannels)
 	int attrSource = GetAttribute( "source");
 	const char* source = mReader->getAttributeValue( attrSource);
 	if( source[0] != '#')
-		ThrowException( boost::str( boost::format( "Unknown reference format in url \"%s\" in source attribute of <input> element.") % source));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Unknown reference format in url \"" << source << "\" in source attribute of <input> element.";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 	channel.mAccessor = source+1; // skipping the leading #, hopefully the remaining text is the accessor ID only
 
 	// read index offset, if per-index <input>
@@ -1979,7 +2026,12 @@ void ColladaParser::ReadInputChannel( std::vector<InputChannel>& poChannels)
 		if(attrSet > -1){
 			attrSet = mReader->getAttributeValueAsInt( attrSet);
 			if(attrSet < 0)
-				ThrowException( boost::str( boost::format( "Invalid index \"%i\" in set attribute of <input> element") % (attrSet)));
+			{
+				std::ostringstream stringStream;
+				stringStream << "Invalid index \"" << attrSet << "\" in set attribute of <input> element";
+				const std::string message = stringStream.str();
+				ThrowException(message.c_str());
+			}
 			
 			channel.mIndex = attrSet;
 		}
@@ -2002,7 +2054,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	// find the offset index for all per-vertex channels
 	size_t numOffsets = 1;
 	size_t perVertexOffset = SIZE_MAX; // invalid value
-	BOOST_FOREACH( const InputChannel& channel, pPerIndexChannels)
+	for ( const InputChannel& channel : pPerIndexChannels)
 	{
 		numOffsets = std::max( numOffsets, channel.mOffset+1);
 		if( channel.mType == IT_Vertex)
@@ -2015,7 +2067,7 @@ void ColladaParser::ReadPrimitives( Mesh* pMesh, std::vector<InputChannel>& pPer
 	{
 		case Prim_Polylist:
 		{
-			BOOST_FOREACH( size_t i, pVCount)
+			for ( size_t i : pVCount)
 				expectedPointCount += i;
 			break;
 		}
@@ -2169,7 +2221,12 @@ void ColladaParser::ExtractDataObjectFromChannel( const InputChannel& pInput, si
 
 	const Accessor& acc = *pInput.mResolved;
 	if( pLocalIndex >= acc.mCount)
-		ThrowException( boost::str( boost::format( "Invalid data index (%d/%d) in primitive specification") % pLocalIndex % acc.mCount));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Invalid data index (" << pLocalIndex << "/" << acc.mCount << ") in primitive specification";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 
 	// get a pointer to the start of the data object referred to by the accessor and the local index
 	const float* dataObject = &(acc.mData->mValues[0]) + acc.mOffset + pLocalIndex* acc.mStride;
@@ -2624,7 +2681,10 @@ void ColladaParser::ReadScene()
 // Aborts the file reading with an exception
 void ColladaParser::ThrowException( const std::string& pError) const
 {
-	throw DeadlyImportError( boost::str( boost::format( "Collada: %s - %s") % mFileName % pError));
+	std::ostringstream stringStream;
+	stringStream << "Collada: " << mFileName << " - " << pError;
+	const std::string message = stringStream.str();
+	throw DeadlyImportError(message.c_str());
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2660,14 +2720,29 @@ void ColladaParser::TestOpening( const char* pName)
 {
 	// read element start
 	if( !mReader->read())
-		ThrowException( boost::str( boost::format( "Unexpected end of file while beginning of <%s> element.") % pName));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Unexpected end of file while beginning of <" << pName << "> element.";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 	// whitespace in front is ok, just read again if found
 	if( mReader->getNodeType() == irr::io::EXN_TEXT)
 		if( !mReader->read())
-			ThrowException( boost::str( boost::format( "Unexpected end of file while reading beginning of <%s> element.") % pName));
+		{
+			std::ostringstream stringStream;
+			stringStream << "Unexpected end of file while reading beginning of <" << pName << "> element.";
+			const std::string message = stringStream.str();
+			ThrowException(message.c_str());
+		}
 
 	if( mReader->getNodeType() != irr::io::EXN_ELEMENT || strcmp( mReader->getNodeName(), pName) != 0)
-		ThrowException( boost::str( boost::format( "Expected start of <%s> element.") % pName));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Expected start of <" << pName << "> element.";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2680,15 +2755,30 @@ void ColladaParser::TestClosing( const char* pName)
 
 	// if not, read some more
 	if( !mReader->read())
-		ThrowException( boost::str( boost::format( "Unexpected end of file while reading end of <%s> element.") % pName));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Unexpected end of file while reading end of <" << pName << "> element.";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 	// whitespace in front is ok, just read again if found
 	if( mReader->getNodeType() == irr::io::EXN_TEXT)
 		if( !mReader->read())
-			ThrowException( boost::str( boost::format( "Unexpected end of file while reading end of <%s> element.") % pName));
+		{
+			std::ostringstream stringStream;
+			stringStream << "Unexpected end of file while reading end of <" << pName << "> element.";
+			const std::string message = stringStream.str();
+			ThrowException(message.c_str());
+		}
 
 	// but this has the be the closing tag, or we're lost
 	if( mReader->getNodeType() != irr::io::EXN_ELEMENT_END || strcmp( mReader->getNodeName(), pName) != 0)
-		ThrowException( boost::str( boost::format( "Expected end of <%s> element.") % pName));
+	{
+		std::ostringstream stringStream;
+		stringStream << "Expected end of <" << pName << "> element.";
+		const std::string message = stringStream.str();
+		ThrowException(message.c_str());
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2700,7 +2790,10 @@ int ColladaParser::GetAttribute( const char* pAttr) const
 		return index;
 
 	// attribute not found -> throw an exception
-	ThrowException( boost::str( boost::format( "Expected attribute \"%s\" for element <%s>.") % pAttr % mReader->getNodeName()));
+	std::ostringstream stringStream;
+	stringStream << "Expected attribute \"" << pAttr << "\" for element <" << mReader->getNodeName() << ">.";
+	const std::string message = stringStream.str();
+	ThrowException(message.c_str());
 	return -1;
 }
 
@@ -2835,7 +2928,10 @@ Collada::InputType ColladaParser::GetTypeForSemantic( const std::string& pSemant
 	else if( pSemantic == "TANGENT" || pSemantic == "TEXTANGENT")
 		return IT_Tangent;
 
-	DefaultLogger::get()->warn( boost::str( boost::format( "Unknown vertex input type \"%s\". Ignoring.") % pSemantic));
+	std::ostringstream stringStream;
+	stringStream << "Unknown vertex input type \"" << pSemantic << "\". Ignoring.";
+	const std::string message = stringStream.str();
+	DefaultLogger::get()->warn(message.c_str());
 	return IT_Invalid;
 }
 

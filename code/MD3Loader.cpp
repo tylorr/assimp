@@ -101,7 +101,7 @@ Q3Shader::BlendFunc StringToBlendFunc(const std::string& m)
 // Load a Quake 3 shader
 bool Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* io)
 {
-	boost::scoped_ptr<IOStream> file( io->Open( pFile, "rt"));
+	std::unique_ptr<IOStream> file( io->Open( pFile, "rt"));
 	if (!file.get())
 		return false; // if we can't access the file, don't worry and return
 
@@ -226,7 +226,7 @@ bool Q3Shader::LoadShader(ShaderData& fill, const std::string& pFile,IOSystem* i
 // Load a Quake 3 skin
 bool Q3Shader::LoadSkin(SkinData& fill, const std::string& pFile,IOSystem* io)
 {
-	boost::scoped_ptr<IOStream> file( io->Open( pFile, "rt"));
+	std::unique_ptr<IOStream> file( io->Open( pFile, "rt"));
 	if (!file.get())
 		return false; // if we can't access the file, don't worry and return
 
@@ -719,7 +719,7 @@ void MD3Importer::InternReadFile( const std::string& pFile,
 			return;
 	}
 
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile));
+	std::unique_ptr<IOStream> file( pIOHandler->Open( pFile));
 
 	// Check whether we can read from the file
 	if( file.get() == NULL)

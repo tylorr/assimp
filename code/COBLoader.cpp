@@ -138,7 +138,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
 	aiScene* pScene, IOSystem* pIOHandler)
 {
 	COB::Scene scene;
-	boost::scoped_ptr<StreamReaderLE> stream(new StreamReaderLE( pIOHandler->Open(pFile,"rb")) );
+	std::unique_ptr<StreamReaderLE> stream(new StreamReaderLE( pIOHandler->Open(pFile,"rb")) );
 
 	// check header
 	char head[32];
@@ -160,17 +160,17 @@ void COBImporter::InternReadFile( const std::string& pFile,
 	}
 
 	// sort faces by material indices
-	for_each(boost::shared_ptr< Node >& n,scene.nodes) {
+	for (std::shared_ptr< Node >& n : scene.nodes) {
 		if (n->type == Node::TYPE_MESH) {
 			Mesh& mesh = (Mesh&)(*n.get());
-			for_each(Face& f,mesh.faces) {
+			for (Face& f : mesh.faces) {
 				mesh.temp_map[f.material].push_back(&f);
 			}
 		} 
 	}
 
 	// count meshes
-	for_each(boost::shared_ptr< Node >& n,scene.nodes) {
+	for (std::shared_ptr< Node >& n : scene.nodes) {
 		if (n->type == Node::TYPE_MESH) {
 			Mesh& mesh = (Mesh&)(*n.get());
 			if (mesh.vertex_positions.size() && mesh.texture_coords.size()) {
@@ -183,7 +183,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
 	pScene->mNumMeshes = 0;
 
 	// count lights and cameras
-	for_each(boost::shared_ptr< Node >& n,scene.nodes) {
+	for (std::shared_ptr< Node >& n : scene.nodes) {
 		if (n->type == Node::TYPE_LIGHT) {
 			++pScene->mNumLights;
 		}
@@ -201,7 +201,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
 	pScene->mNumLights = pScene->mNumCameras = 0;
 
 	// resolve parents by their IDs and build the output graph
-	boost::scoped_ptr<Node> root(new Group());
+	std::unique_ptr<Node> root(new Group());
 	for(size_t n = 0; n < scene.nodes.size(); ++n) {
 		const Node& nn = *scene.nodes[n].get();
 		if(nn.parent_id==0) {
@@ -220,7 +220,7 @@ void COBImporter::InternReadFile( const std::string& pFile,
 }
 
 // ------------------------------------------------------------------------------------------------
-void ConvertTexture(boost::shared_ptr< Texture > tex, aiMaterial* out, aiTextureType type)
+void ConvertTexture(std::shared_ptr< Texture > tex, aiMaterial* out, aiTextureType type)
 {
 	const aiString path( tex->path );
 	out->AddProperty(&path,AI_MATKEY_TEXTURE(type,0));
@@ -241,10 +241,10 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 		if (ndmesh.vertex_positions.size() && ndmesh.texture_coords.size()) {
 
 			typedef std::pair<unsigned int,Mesh::FaceRefList> Entry;
-			for_each(const Entry& reflist,ndmesh.temp_map) {
+			for (const Entry& reflist : ndmesh.temp_map) {
 				{	// create mesh
 					size_t n = 0;
-					for_each(Face* f, reflist.second) {
+					for (Face* f : reflist.second) {
 						n += f->indices.size();
 					}
 					if (!n) {
@@ -257,7 +257,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 					outmesh->mTextureCoords[0] = new aiVector3D[n];
 
 					outmesh->mFaces = new aiFace[reflist.second.size()]();
-					for_each(Face* f, reflist.second) {
+					for (Face* f : reflist.second) {
 						if (f->indices.empty()) {
 							continue;
 						}
@@ -265,7 +265,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 						aiFace& fout = outmesh->mFaces[outmesh->mNumFaces++];
 						fout.mIndices = new unsigned int[f->indices.size()];
 
-						for_each(VertexIndex& v, f->indices) {
+						for (VertexIndex& v : f->indices) {
 							if (v.pos_idx >= ndmesh.vertex_positions.size()) {
 								ThrowException("Position index out of range");
 							}
@@ -285,13 +285,13 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 					outmesh->mMaterialIndex = fill->mNumMaterials;
 				}{	// create material
 					const Material* min = NULL;
-					for_each(const Material& m, scin.materials) {
+					for (const Material& m : scin.materials) {
 						if (m.parent_id == ndmesh.id && m.matnum == reflist.first) {
 							min = &m;
 							break;
 						}
 					}
-					boost::scoped_ptr<const Material> defmat;
+					std::unique_ptr<const Material> defmat;
 					if(!min) {
 						DefaultLogger::get()->debug(format()<<"Could not resolve material index "
 							<<reflist.first<<" - creating default material for this slot");
@@ -386,7 +386,7 @@ aiNode* COBImporter::BuildNodes(const Node& root,const Scene& scin,aiScene* fill
 
 	// add children recursively
 	nd->mChildren = new aiNode*[root.temp_children.size()]();
-	for_each(const Node* n, root.temp_children) {
+	for (const Node* n : root.temp_children) {
 		(nd->mChildren[nd->mNumChildren++] = BuildNodes(*n,scin,fill))->mParent = nd;
 	}
 
@@ -637,7 +637,7 @@ void COBImporter::ReadUnit_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 
 	// parent chunks preceede their childs, so we should have the
 	// corresponding chunk already.
-	for_each(boost::shared_ptr< Node >& nd, out.nodes) {
+	for (std::shared_ptr< Node >& nd : out.nodes) {
 		if (nd->id == nfo.parent_id) {
 			const unsigned int t=strtoul10(splitter[1]);
 		
@@ -666,7 +666,7 @@ void COBImporter::ReadLght_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 		return UnsupportedChunk_Ascii(splitter,nfo,"Lght");
 	}
 
-	out.nodes.push_back(boost::shared_ptr<Light>(new Light()));
+	out.nodes.push_back(std::shared_ptr<Light>(new Light()));
 	Light& msh = (Light&)(*out.nodes.back().get());
 	msh = nfo;
 
@@ -722,7 +722,7 @@ void COBImporter::ReadCame_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 		return UnsupportedChunk_Ascii(splitter,nfo,"Came");
 	}
 
-	out.nodes.push_back(boost::shared_ptr<Camera>(new Camera()));
+	out.nodes.push_back(std::shared_ptr<Camera>(new Camera()));
 	Camera& msh = (Camera&)(*out.nodes.back().get());
 	msh = nfo;
 
@@ -740,7 +740,7 @@ void COBImporter::ReadBone_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 		return UnsupportedChunk_Ascii(splitter,nfo,"Bone");
 	}
 
-	out.nodes.push_back(boost::shared_ptr<Bone>(new Bone()));
+	out.nodes.push_back(std::shared_ptr<Bone>(new Bone()));
 	Bone& msh = (Bone&)(*out.nodes.back().get());
 	msh = nfo;
 
@@ -756,7 +756,7 @@ void COBImporter::ReadGrou_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 		return UnsupportedChunk_Ascii(splitter,nfo,"Grou");
 	}
 
-	out.nodes.push_back(boost::shared_ptr<Group>(new Group()));
+	out.nodes.push_back(std::shared_ptr<Group>(new Group()));
 	Group& msh = (Group&)(*out.nodes.back().get());
 	msh = nfo;
 
@@ -770,7 +770,7 @@ void COBImporter::ReadPolH_Ascii(Scene& out, LineSplitter& splitter, const Chunk
 		return UnsupportedChunk_Ascii(splitter,nfo,"PolH");
 	}
 
-	out.nodes.push_back(boost::shared_ptr<Mesh>(new Mesh()));
+	out.nodes.push_back(std::shared_ptr<Mesh>(new Mesh()));
 	Mesh& msh = (Mesh&)(*out.nodes.back().get());
 	msh = nfo;
 
@@ -893,7 +893,7 @@ void COBImporter::ReadBitM_Ascii(Scene& /*out*/, LineSplitter& splitter, const C
 void COBImporter::ReadString_Binary(std::string& out, StreamReaderLE& reader)
 {
 	out.resize( reader.GetI2());
-	for_each(char& c,out) {
+	for (char& c : out) {
 		c = reader.GetI1();
 	}
 }
@@ -1026,21 +1026,21 @@ void COBImporter::ReadPolH_Binary(COB::Scene& out, StreamReaderLE& reader, const
 	}
 	const chunk_guard cn(nfo,reader);
 
-	out.nodes.push_back(boost::shared_ptr<Mesh>(new Mesh()));
+	out.nodes.push_back(std::shared_ptr<Mesh>(new Mesh()));
 	Mesh& msh = (Mesh&)(*out.nodes.back().get());
 	msh = nfo;
 
 	ReadBasicNodeInfo_Binary(msh,reader,nfo);
 
 	msh.vertex_positions.resize(reader.GetI4());
-	for_each(aiVector3D& v,msh.vertex_positions) {
+	for (aiVector3D& v : msh.vertex_positions) {
 		v.x = reader.GetF4();
 		v.y = reader.GetF4();
 		v.z = reader.GetF4();
 	}
 
 	msh.texture_coords.resize(reader.GetI4());
-	for_each(aiVector2D& v,msh.texture_coords) {
+	for (aiVector2D& v : msh.texture_coords) {
 		v.x = reader.GetF4();
 		v.y = reader.GetF4();
 	}
@@ -1216,7 +1216,7 @@ void COBImporter::ReadCame_Binary(COB::Scene& out, StreamReaderLE& reader, const
 
 	const chunk_guard cn(nfo,reader);
 
-	out.nodes.push_back(boost::shared_ptr<Camera>(new Camera()));
+	out.nodes.push_back(std::shared_ptr<Camera>(new Camera()));
 	Camera& msh = (Camera&)(*out.nodes.back().get());
 	msh = nfo;
 
@@ -1239,7 +1239,7 @@ void COBImporter::ReadLght_Binary(COB::Scene& out, StreamReaderLE& reader, const
 
 	const chunk_guard cn(nfo,reader);
 
-	out.nodes.push_back(boost::shared_ptr<Light>(new Light()));
+	out.nodes.push_back(std::shared_ptr<Light>(new Light()));
 	Light& msh = (Light&)(*out.nodes.back().get());
 	msh = nfo;
 
@@ -1255,7 +1255,7 @@ void COBImporter::ReadGrou_Binary(COB::Scene& out, StreamReaderLE& reader, const
 
 	const chunk_guard cn(nfo,reader);
 
-	out.nodes.push_back(boost::shared_ptr<Group>(new Group()));
+	out.nodes.push_back(std::shared_ptr<Group>(new Group()));
 	Group& msh = (Group&)(*out.nodes.back().get());
 	msh = nfo;
 
@@ -1273,7 +1273,7 @@ void COBImporter::ReadUnit_Binary(COB::Scene& out, StreamReaderLE& reader, const
 
 	// parent chunks preceede their childs, so we should have the
 	// corresponding chunk already.
-	for_each(boost::shared_ptr< Node >& nd, out.nodes) {
+	for (std::shared_ptr< Node >& nd : out.nodes) {
 		if (nd->id == nfo.parent_id) {
 			const unsigned int t=reader.GetI2();
 			nd->unit_scale = t>=sizeof(units)/sizeof(units[0])?(

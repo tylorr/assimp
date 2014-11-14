@@ -59,7 +59,7 @@ void DOMWarning(const std::string& message, const Element* element = NULL);
 
 
 // fetch a property table and the corresponding property template 
-boost::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 
+std::shared_ptr<const PropertyTable> GetPropertyTable(const Document& doc, 
 	const std::string& templateName, 
 	const Element &element, 
 	const Scope& sc,

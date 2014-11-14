@@ -44,8 +44,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INCLUDED_AI_FBX_TOKENIZER_H
 #define INCLUDED_AI_FBX_TOKENIZER_H
 
-#include <boost/shared_ptr.hpp>
-
 #include "FBXCompileConfig.h"
 
 namespace Assimp {

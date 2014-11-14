@@ -112,7 +112,7 @@ void ObjFileImporter::InternReadFile( const std::string& pFile, aiScene* pScene,
 {    
 	// Read file into memory
 	const std::string mode = "rb";
-	boost::scoped_ptr<IOStream> file( pIOHandler->Open( pFile, mode));
+	std::unique_ptr<IOStream> file( pIOHandler->Open( pFile, mode));
     if( !file.get() ) {
         throw DeadlyImportError( "Failed to open file " + pFile + "." );
     }

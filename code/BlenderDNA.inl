@@ -81,14 +81,14 @@ const Field& Structure :: operator [] (const size_t i) const
 }
 
 //--------------------------------------------------------------------------------
-template <typename T> boost::shared_ptr<ElemBase> Structure :: Allocate() const 
+template <typename T> std::shared_ptr<ElemBase> Structure :: Allocate() const 
 {
-	return boost::shared_ptr<T>(new T()); 
+	return std::shared_ptr<T>(new T()); 
 }
 
 //--------------------------------------------------------------------------------
 template <typename T> void Structure :: Convert(
-	boost::shared_ptr<ElemBase> in,
+	std::shared_ptr<ElemBase> in,
 	const FileDatabase& db) const 
 {
 	Convert<T> (*static_cast<T*> ( in.get() ),db);
@@ -364,7 +364,7 @@ bool Structure :: ResolvePointer(TOUT<T>& out, const Pointer & ptrval, const Fil
 
 
 //--------------------------------------------------------------------------------
-inline bool Structure :: ResolvePointer( boost::shared_ptr< FileOffset >& out, const Pointer & ptrval, 
+inline bool Structure :: ResolvePointer( std::shared_ptr< FileOffset >& out, const Pointer & ptrval, 
 	const FileDatabase& db, 
 	const Field&,
 	bool) const
@@ -379,7 +379,7 @@ inline bool Structure :: ResolvePointer( boost::shared_ptr< FileOffset >& out, c
 	// find the file block the pointer is pointing to
 	const FileBlockHead* block = LocateFileBlockForAddress(ptrval,db);
 
-	out =  boost::shared_ptr< FileOffset > (new FileOffset());
+	out =  std::shared_ptr< FileOffset > (new FileOffset());
 	out->val = block->start+ static_cast<size_t>((ptrval.val - block->address.val) );
 	return false;
 }
@@ -424,7 +424,7 @@ bool Structure :: ResolvePointer(vector< TOUT<T> >& out, const Pointer & ptrval,
 }
 
 //--------------------------------------------------------------------------------
-template <> bool Structure :: ResolvePointer<boost::shared_ptr,ElemBase>(boost::shared_ptr<ElemBase>& out, 
+template <> bool Structure :: ResolvePointer<std::shared_ptr,ElemBase>(std::shared_ptr<ElemBase>& out, 
 	const Pointer & ptrval, 
 	const FileDatabase& db, 
 	const Field&,
@@ -701,7 +701,7 @@ template <template <typename> class TOUT> template <typename T> void ObjectCache
 
 	typename StructureCache::const_iterator it = caches[s.cache_idx].find(ptr);
 	if (it != caches[s.cache_idx].end()) {
-		out = boost::static_pointer_cast<T>( (*it).second );
+		out = std::static_pointer_cast<T>( (*it).second );
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 		++db.stats().cache_hits;
@@ -721,7 +721,7 @@ template <template <typename> class TOUT> template <typename T> void ObjectCache
 		s.cache_idx = db.next_cache_idx++;
 		caches.resize(db.next_cache_idx);
 	}
-	caches[s.cache_idx][ptr] = boost::static_pointer_cast<ElemBase>( out ); 
+	caches[s.cache_idx][ptr] = std::static_pointer_cast<ElemBase>( out ); 
 
 #ifndef ASSIMP_BUILD_BLENDER_NO_STATS
 	++db.stats().cached_objects;
